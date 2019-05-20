@@ -1,32 +1,35 @@
 const node_ssh = require('node-ssh');
-const ssh = new node_ssh()
 
 /*
- * Telemetry class provides interface to communicate with capture stations
+ * Telemetry provides interface to communicate with capture stations
  */
-class Telemetry { 
-    connect() {
-        ssh.connect({
-            host: '',
-            username: '',
-            password: ''
-        })
-        .then(() => { 
-            console.log('Connected');
-            ssh.exec('uptime').then((stream) => {
-                console.log(stream);
-                ssh.dispose();
-            })
-        })
-        .catch((e) => {
-            console.log('Error Connecting ');
-            console.log(e);
-        })
-    }
-    runScript() { 
-        this.connect();
+class Telemetry {
+    constructor( host, username, password) { 
+        this.credential = {host, username, password};
     }
 
+    async statusCheck() {
+        const ssh = new node_ssh();
+        this.ssh = ssh; 
+        return new Promise(async (resolve, reject) => { 
+            try { 
+                await ssh.connect(this.credential);
+                const uptime = await ssh.exec('uptime --since');
+                resolve(new Date(uptime));
+            } 
+            catch (err) {
+                reject(err);
+            }
+            finally { 
+                this.close();
+            }
+        })
+    }
+
+    close() { 
+        this.ssh.dispose();
+    }
+    
     healthCheck() {}
     backup() {}
     restore() {}
