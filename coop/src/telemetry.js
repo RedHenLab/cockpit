@@ -4,7 +4,7 @@ const node_ssh = require('node-ssh');
  * Telemetry provides interface to communicate with capture stations
  */
 class Telemetry {
-    constructor( host, username, password) { 
+    constructor({ host, username, password}) { 
         this.credential = {host, username, password};
     }
 

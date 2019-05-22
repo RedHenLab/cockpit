@@ -16,6 +16,17 @@ app.get('/', async (req,res) => {
     };
 });
 
+app.post('/refresh', async (req,res) => { 
+    try { 
+        c.refreshStationInfo(req,res);
+    }
+    catch(err) {
+        console.log(err);
+    };
+});
+
+app.post('/add', c.addStation);
+
 app.listen(config.port, () => {
     console.log(`Started coop on port ${config.port}`);
 })

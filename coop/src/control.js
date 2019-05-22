@@ -19,7 +19,10 @@ class Control {
         const station = await Station.findOne({_id: req.body.stationId}).exec();
         const tele = new Telemetry(station);
         const date = await tele.statusCheck();
-        res.json(date);
+        station.lastOnline = new Date();
+        station.uptime = date;
+        await station.save();
+        res.json(station);
     }
 
     /*
@@ -31,15 +34,16 @@ class Control {
     /*
      * Add a new Capture Station to DB
      */
-    addStation() {
+    addStation(req) {
+        const { name, location } = req.body;
         Station.create({
-            name: 'My Pi',
-            location: 'My Room',
+            name,
+            location,
             host: '192.168.1.7',
             port: '22',
             username: 'pi',
             password: 'raspberry',
-            lastOnline: Date.now(),
+            lastChecked: Date.now(),
             lastBackup: Date.now()
         }, function(err, obj) { 
             console.log('Success');

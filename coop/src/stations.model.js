@@ -9,9 +9,9 @@ let StationSchema = mongoose.Schema({
     port: String,
     username: String,
     password: String,
-    lastOnline: Date,
+    lastChecked: Date,
     lastBackup: Date,
-    uptime: Date,
+    onlineSince: Date,
 })
 
 StationSchema.statics = { 
@@ -20,13 +20,14 @@ StationSchema.statics = {
             try {
                 let stations = await this.find().lean().exec();
                 stations = stations.map( (station) => {
-                    const isOnline = (( Date.now() - station.lastOnline ) < uptimeThreshold);
+                    const isOnline = (( Date.now() - station.lastChecked ) < uptimeThreshold);
                     return {
                         _id: station._id,
                         name: station.name,
                         location: station.location,
-                        lastOnline: station.lastOnline,
+                        lastChecked: station.lastChecked,
                         lastBackup: station.lastBackup,
+                        onlineSince: station.onlineSince,
                         isOnline
                     }
                 });
