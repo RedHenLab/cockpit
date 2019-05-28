@@ -101,7 +101,7 @@ class StationTable extends React.Component {
         selectedId: 0,
         selected: null
     }
-    handleClick = (selected) => { 
+    handleClick = (selected) => {
         this.setState({selectedId: selected._id, selected});
         this.props.setSelection(selected);
     }

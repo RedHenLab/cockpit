@@ -19,8 +19,8 @@ class Control {
         const station = await Station.findOne({_id: req.body.stationId}).exec();
         const tele = new Telemetry(station);
         const date = await tele.statusCheck();
-        station.lastOnline = new Date();
-        station.uptime = date;
+        station.lastChecked = new Date();
+        station.onlineSince = date;
         await station.save();
         res.json(station);
     }
@@ -46,10 +46,27 @@ class Control {
             lastChecked: Date.now(),
             lastBackup: Date.now()
         }, function(err, obj) { 
-            console.log('Success');
             console.log(obj);
         });
     }
+
+    /*
+     * Edit an existing Capture station
+     * Only name, location, host, port and username
+     * can be changed.
+    */
+   async editStation(req,res) {
+        const { _id, name, location, host, port, username } = req.body.station;
+        const station = await Station.findOne({_id: _id}).exec();
+        station.name = name;
+        station.location = location;
+        station.host = host;
+        station.port = port;
+        station.username = username;
+        await station.save();
+        res.json(station);
+   }
+
 }
 
 module.exports = Control;

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
-const uptimeThreshold = 1000 * 60 * 30;
+const uptimeThreshold = 1000 * 60 * 60 *12;
 
 let StationSchema = mongoose.Schema({
     name: String,
@@ -21,15 +21,8 @@ StationSchema.statics = {
                 let stations = await this.find().lean().exec();
                 stations = stations.map( (station) => {
                     const isOnline = (( Date.now() - station.lastChecked ) < uptimeThreshold);
-                    return {
-                        _id: station._id,
-                        name: station.name,
-                        location: station.location,
-                        lastChecked: station.lastChecked,
-                        lastBackup: station.lastBackup,
-                        onlineSince: station.onlineSince,
-                        isOnline
-                    }
+                    const { _id, name, location, host, port, username, lastBackup, lastChecked, onlineSince} = station; 
+                    return { _id, name, location, host, port, username, lastBackup, lastChecked, isOnline, onlineSince};
                 });
                 resolve(stations);
             }

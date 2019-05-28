@@ -3,7 +3,10 @@ import { CssBaseline, Grid } from '@material-ui/core/';
 import StationTable from './StationTable';
 import InfoPanel from './InfoPanel';
 import Logo from './logo.png'
+import Notification from './Notification';
+import {list, refresh, edit} from './config';
 import './App.css';
+
 
 class App extends React.Component {
   constructor(props) {
@@ -11,8 +14,12 @@ class App extends React.Component {
     this.state = {
       stations: [],
       selected: 0,
-    } 
-    fetch('http://localhost:4000/')
+      notification: {
+        open: false,
+        message: '',
+      }
+    }
+    fetch(list)
     .then((res) => {
         return res.json();
     })
@@ -22,7 +29,7 @@ class App extends React.Component {
   }
 
   refreshStation = (id) => {
-    fetch('http://localhost:4000/refresh', {
+    fetch(refresh, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,6 +46,32 @@ class App extends React.Component {
     });
   }
 
+  updateStation = (station) => {
+    let notification = {
+      open:true
+    };
+    fetch(edit, { 
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ station })  
+    })
+     .then((res) => {
+       if (res.status === 200) { 
+          notification.message = 'Station updated.';
+       }
+       else {notification.message = 'Error. Could not update station.';}
+     })
+     .catch((err) => {
+        notification.message = 'Error. Could not update station.';
+        console.error(err);
+     })
+     .finally(() => {
+      this.setState({notification})
+     });
+  }
+
   setSelection = (selected) => {
     this.setState({selected});
   }
@@ -46,7 +79,13 @@ class App extends React.Component {
     this.setState({selected:null});
   }
 
-  render() { 
+  handleNotificationClose = ( ) => { 
+    const notification = this.state.notification;
+    notification.open = false;
+    this.setState({notification});
+  }
+  render() {
+    const {stations, selected, notification} = this.state;
     return (
       <>
         <CssBaseline />
@@ -65,20 +104,22 @@ class App extends React.Component {
             </Grid>
             <Grid item xs={5} style={{padding: 20}}>
               <InfoPanel
-                stations={this.state.stations}
-                selected={this.state.selected}
+                stations={stations}
+                selected={selected}
                 refreshStation={this.refreshStation}
+                updateStation={this.updateStation}
               />
             </Grid>
             <Grid item xs={7} style={{padding: 20}}>
               <StationTable 
-                stations={this.state.stations}
-                selected={this.state.selected}
+                stations={stations}
+                selected={selected}
                 setSelection={this.setSelection}
                 clearSelection={this.clearSelection}
               />
             </Grid>
           </Grid>
+          <Notification open={notification.open} message={notification.message} handleClose={this.handleNotificationClose}/>
         </div>
       </> 
     );
