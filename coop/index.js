@@ -1,5 +1,8 @@
+const mongoose = require('mongoose');
 const app = require('./src/express');
 const Control = require('./src/control');
+
+mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
 
 const c = new Control();
 

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
 const uptimeThreshold = 1000 * 60 * 60 *12;
 
 let StationSchema = mongoose.Schema({
