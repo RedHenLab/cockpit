@@ -6,38 +6,28 @@ mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
 
 const c = new Control();
 
+/* TODO: migrate to .env */
 const config = { 
     port: 4000,
 }
 
-app.get('/', async (req,res) => { 
-    try { 
-        c.listStations(req,res);
+function handle(middleware) { 
+    return async (req, res) => { 
+        try { 
+            await middleware(req, res)
+        }
+        catch (err) { 
+            console.log(err);
+            res.json(err);
+        }
     }
-    catch(err) {
-        console.log(err);
-    };
-});
+}
 
-app.post('/refresh', async (req,res) => { 
-    try { 
-        c.refreshStationInfo(req,res);
-    }
-    catch(err) {
-        console.log(err);
-    };
-});
-
+app.get('/list', handle(c.listStations));
+app.post('/refresh', handle(c.refreshStationInfo));
 app.post('/add', c.addStation);
-
-app.post('/edit', async (req, res) => {
-    try { 
-        c.editStation(req,res);
-    }
-    catch(err) {
-        console.log(err);
-    };
-});
+app.post('/edit', handle(c.editStation));
+app.post('/report', handle(c.runDiagnostics));
 
 app.listen(config.port, () => {
     console.log(`Started coop on port ${config.port}`);
