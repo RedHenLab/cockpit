@@ -1,5 +1,6 @@
 const Telemetry = require('./telemetry');
 const Station = require('./stations.model');
+const Report = require('./report.model');
 
 class Control {
     /* 
@@ -29,7 +30,22 @@ class Control {
      * Run the preloaded diagnostic helth check script
      * on the Capture Station.
      */ 
-    runDiagnostics(res, req) {}
+    async runDiagnostics(req, res) {
+        const station = await Station.findOne({_id: req.body._id}).exec();
+        const tele = new Telemetry(station)
+        const freshReport = await tele.healthCheck();
+  
+        const report = new Report();
+        report.stationId = req.body._id;
+        report.disks = freshReport.storage.disks;
+        report.cards = freshReport.storage.cards;
+        report.hdhomerun_devices = freshReport.hdhomerun_devices;
+        report.security = freshReport.security;
+        report.errors = freshReport.errors;
+
+        await report.save()
+        res.json(report);
+    }
 
     /*
      * Add a new Capture Station to DB

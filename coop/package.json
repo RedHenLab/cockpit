@@ -13,7 +13,8 @@
     "express": "^4.17.0",
     "helmet": "^3.18.0",
     "mongoose": "^5.5.9",
-    "node-ssh": "^6.0.0"
+    "node-ssh": "^6.0.0",
+    "ssh-config": "^1.1.6"
   },
   "scripts": {
     "start": "node index.js"

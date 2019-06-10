@@ -13,7 +13,7 @@ let ReportSchema = mongoose.Schema({
         used: Number
     }],
     hdhomerun_devices: [{
-        id: Number,
+        id: String,
         ip: String
     }],
     security: {
@@ -27,3 +27,5 @@ ReportSchema.statics = {
         });
     }
 } 
+
+module.exports = mongoose.model('Report',ReportSchema);

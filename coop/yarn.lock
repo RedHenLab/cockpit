@@ -1201,6 +1201,10 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
+ssh-config@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/ssh-config/-/ssh-config-1.1.6.tgz#c6ce2d7f85f395178c9e47c448d62b8adf9b2523"
+
 ssh2-streams@~0.4.4:
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/ssh2-streams/-/ssh2-streams-0.4.4.tgz#7f07464c4b19ee93324995ec7164f110c5a13658"
