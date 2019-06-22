@@ -1,7 +1,7 @@
 const url = 'http://localhost:4000';
 
 const 
-    list = `${url}`,
+    list = `${url}/list`,
     refresh = `${url}/refresh`,
     edit =  `${url}/edit`;
 

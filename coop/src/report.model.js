@@ -1,11 +1,19 @@
 const mongoose = require('mongoose');
 
+/**
+ * Mongoose schema for capture station health check reports
+ */
 let ReportSchema = mongoose.Schema({
     stationId: { type: 'ObjectId'},
     disks: [{
-        available: Number,
         name: String,
-        used: Number      
+        available: Number,
+        used: Number,
+        smart_enabled: Boolean,
+        smart_report: { 
+            status: String,
+            lifetime: Number
+        },
     }],
     cards: [{
         available: Number,

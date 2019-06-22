@@ -1,0 +1,22 @@
+version: "3"
+services:
+  web:
+    image: animysore/cockpit:coop-1.0.0
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "4000:4000"
+    networks:
+      - webnet
+  mongo:
+    image: mongo
+    restart: always
+
+networks:
+  webnet:

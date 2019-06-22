@@ -1,6 +1,14 @@
 const mongoose = require('mongoose');
-const uptimeThreshold = 1000 * 60 * 60 *12;
 
+/**
+ * Threshold to calulate uptime expressed in  milliseconds
+ * 1000 (milliseconds) * 60 (seconds) * 60 (minutes) * 12 (hours) = 12 hour threshold 
+ */
+const uptimeThreshold = 1000 * 60 * 60 *12;  
+
+/**
+ * Mongoose schema for capture stations 
+ */
 let StationSchema = mongoose.Schema({
     name: String,
     location: String,
@@ -13,7 +21,10 @@ let StationSchema = mongoose.Schema({
     onlineSince: Date,
 })
 
-StationSchema.statics = { 
+StationSchema.statics = {
+    /**
+     * Retrieves all station objects from db and filters out fields to be passed to frontend    
+     */
     async retrieve() {
         return new Promise(async (resolve,reject) => {
             try {
@@ -28,7 +39,7 @@ StationSchema.statics = {
             catch (err) { reject(err); }
         });
     }
-} 
+}
 
 module.exports = mongoose.model('Station',StationSchema);
 
