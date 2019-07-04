@@ -2,14 +2,14 @@ const mongoose = require('mongoose');
 
 /**
  * Threshold to calulate uptime expressed in  milliseconds
- * 1000 (milliseconds) * 60 (seconds) * 60 (minutes) * 12 (hours) = 12 hour threshold 
+ * 1000 (milliseconds) * 60 (seconds) * 60 (minutes) * 12 (hours) = 12 hour threshold
  */
 const uptimeThreshold = 1000 * 60 * 60 *12;  
 
 /**
- * Mongoose schema for capture stations 
+ * Mongoose schema for capture stations
  */
-let StationSchema = mongoose.Schema({
+let StationSchema = new mongoose.Schema({
     name: String,
     location: String,
     host: String,
@@ -23,15 +23,15 @@ let StationSchema = mongoose.Schema({
 
 StationSchema.statics = {
     /**
-     * Retrieves all station objects from db and filters out fields to be passed to frontend    
+     * Retrieves all station objects from db and filters out fields to be passed to frontend
      */
     async retrieve() {
         return new Promise(async (resolve,reject) => {
             try {
                 let stations = await this.find().lean().exec();
                 stations = stations.map( (station) => {
-                    const isOnline = (( Date.now() - station.lastChecked ) < uptimeThreshold);
-                    const { _id, name, location, host, port, username, lastBackup, lastChecked, onlineSince} = station; 
+                    const isOnline = (station.lastChecked)? (( Date.now() - station.lastChecked ) < uptimeThreshold): false;
+                    const { _id, name, location, host, port, username, lastBackup, lastChecked, onlineSince} = station;
                     return { _id, name, location, host, port, username, lastBackup, lastChecked, isOnline, onlineSince};
                 });
                 resolve(stations);

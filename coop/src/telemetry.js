@@ -8,11 +8,11 @@ const fs = require('fs')
  */
 class Telemetry {
     /**
-     *  @param {string} host - hostname that can be read from ssh config file 
+     *  @param {Station} station - contains hostname that can be read from ssh config file 
      */
-    constructor(host) { 
+    constructor(station) { 
         const conf = SSHConfig.parse(fs.readFileSync('/home/aniruddha/.ssh/config', 'utf8'));
-        const cred = conf.compute(host);
+        const cred = conf.compute('cartago');
         this.credential = {
             host:cred.Hostname, 
             username: cred.User, 
@@ -26,13 +26,13 @@ class Telemetry {
      */
     async statusCheck() {
         const ssh = new node_ssh();
-        this.ssh = ssh; 
+        this.ssh = ssh;
         return new Promise(async (resolve, reject) => { 
             try { 
-                await ssh.connect(this.credential);
-                const uptime = await ssh.exec('uptime --since');
+                await ssh.connect(this.credential); 
+                const uptime = await ssh.exec('bash space/status.sh');
                 resolve(new Date(uptime));
-            } 
+            }
             catch (err) {
                 reject(err);
             }
@@ -45,29 +45,29 @@ class Telemetry {
     /**
      *  Close ssh connection
      */
-    close() { 
+    close() {
         this.ssh.dispose();
     }
 
     /**
      *  Run the health check report script on the capture station
-     *  @returns {Promise<Report>} Promise that returns the generated Report object  
-     */    
+     *  @returns {Promise<Report>} Promise that returns the generated Report object
+     */
     async healthCheck() {
         const ssh = new node_ssh();
         this.ssh = ssh;
 
         return new Promise(async(resolve, reject) => {
-            try { 
+            try {
                 await ssh.connect(this.credential);
                 await ssh.exec('cd space; bash callreport.sh');
                 const report = await ssh.exec('cat space/report.json');
                 resolve(JSON.parse(report));
-            } 
-            catch (err) { 
+            }
+            catch (err) {
                 reject(err);
             }
-            finally { 
+            finally {
                 this.close();
             }
         })

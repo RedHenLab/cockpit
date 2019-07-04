@@ -1,8 +1,16 @@
 const mongoose = require('mongoose');
+const passport = require('passport');
+const LocalStrategy = require('passport-local')
 const app = require('./src/express');
 const Control = require('./src/control');
-
+ 
 mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
+
+passport.use(new LocalStrategy(
+   (username, password, done) => {
+       
+   }
+));
 
 const c = new Control();
 
@@ -23,12 +31,20 @@ function handle(middleware) {
     }
 }
 
-app.get('/list', handle(c.listStations));
+app.get('/list', /*passport.authenticate('local'),*/ handle(c.listStations));
 app.post('/refresh', handle(c.refreshStationInfo));
 app.post('/add', c.addStation);
 app.post('/edit', handle(c.editStation));
 app.post('/report', handle(c.runDiagnostics));
+app.post('/delete',handle(c.deleteStation))
 
-app.listen(config.port, () => {
-    console.log(`Started coop on port ${config.port}`);
-})
+// module.parent check is required to support mocha watch
+// src: https://github.com/mochajs/mocha/issues/1912
+if (!module.parent) {
+    app.listen(config.port, () => {
+        console.log(`Started coop on port ${config.port}`);
+    })
+}
+
+// For testing the app with mocha
+module.exports = app;

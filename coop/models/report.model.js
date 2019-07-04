@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 /**
  * Mongoose schema for capture station health check reports
  */
-let ReportSchema = mongoose.Schema({
+let ReportSchema = new mongoose.Schema({
     stationId: { type: 'ObjectId'},
     disks: [{
         name: String,
@@ -26,7 +26,8 @@ let ReportSchema = mongoose.Schema({
     }],
     security: {
         failed_login: Number
-    }
+    },
+    errorsLog: []
 })
 
 ReportSchema.statics = { 

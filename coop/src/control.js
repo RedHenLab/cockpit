@@ -1,35 +1,38 @@
 const Telemetry = require('./telemetry');
-const Station = require('./stations.model');
-const Report = require('./report.model');
+const Station = require('../models/stations.model');
+const Report = require('../models/report.model');
 
 class Control {
-    /* 
-     * List all the Red Hen Capture Stations whose 
-     * config information is currently present in DB.
+    /**
+     * List all the Red Hen capture sations whose config information is currently present in DB.
      */
     async listStations (req, res) {
         const stations = await Station.retrieve()
         res.json(stations);
     }
 
-    /*
-     * Check if Capture Station is online and refresh 
-     * its status information in the DB. 
+    /**
+     * Check if capture station is online and refresh its status information in the DB. 
      */
     async refreshStationInfo(req, res) {
-        const station = await Station.findOne({_id: req.body.stationId}).exec();
+        const station = await Station.findOne({_id: req.body._id}).exec();
         const tele = new Telemetry(station);
         const date = await tele.statusCheck();
         station.lastChecked = new Date();
         station.onlineSince = date;
+
         await station.save();
-        res.json(station);
+
+        //TODO : make this part of model
+        const stationObj = station.toObject()
+        stationObj.isOnline = date ? true : false;
+
+        res.json(stationObj);
     }
 
-    /*
-     * Run the preloaded diagnostic helth check script
-     * on the Capture Station.
-     */ 
+    /**
+     * Run the preloaded diagnostic health check script on the capture station.
+     */
     async runDiagnostics(req, res) {
         const station = await Station.findOne({_id: req.body._id}).exec();
         const tele = new Telemetry(station)
@@ -47,32 +50,23 @@ class Control {
         res.json(report);
     }
 
-    /*
-     * Add a new Capture Station to DB
+    /**
+     * Add a new capture station to DB
      */
-    addStation(req) {
-        const { name, location } = req.body;
-        Station.create({
-            name,
-            location,
-            host: '192.168.1.7',
-            port: '22',
-            username: 'pi',
-            password: 'raspberry',
-            lastChecked: Date.now(),
-            lastBackup: Date.now()
-        }, function(err, obj) { 
-            console.log(obj);
+    addStation(req, res) {
+        const { name, location, host, port, username } = req.body;
+        Station.create({ name, location, host, port, username }, (err, obj) => {
+            if (err) res.status(400).json(err);
+            else res.json(obj);
         });
     }
 
-    /*
-     * Edit an existing Capture station
-     * Only name, location, host, port and username
-     * can be changed.
+    /**
+     * Edit an existing capture station
+     * name, location, host, port and username are editable
     */
-   async editStation(req,res) {
-        const { _id, name, location, host, port, username } = req.body.station;
+    async editStation(req, res) {
+        const { _id, name, location, host, port, username } = req.body;
         const station = await Station.findOne({_id: _id}).exec();
         station.name = name;
         station.location = location;
@@ -81,8 +75,15 @@ class Control {
         station.username = username;
         await station.save();
         res.json(station);
-   }
+    }
 
+    /**
+     * Remove existing capture station from db
+     */
+    async deleteStation(req, res) {
+        const station = await Station.findOneAndDelete({_id:req.body._id}).exec();
+        res.json(station);
+    }
 }
 
 module.exports = Control;
