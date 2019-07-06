@@ -1,23 +1,15 @@
 const mongoose = require('mongoose');
-const passport = require('passport');
-const LocalStrategy = require('passport-local')
-const app = require('./src/express');
+const app = require('./config/express');
+const passport = require('./config/passport'); 
 const Control = require('./src/control');
- 
+const User = require('./models/user.model');
+
+const config = require('./config');
+const auth = require('./config/auth');
+
 mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
 
-passport.use(new LocalStrategy(
-   (username, password, done) => {
-       
-   }
-));
-
 const c = new Control();
-
-/* TODO: migrate to .env */
-const config = { 
-    port: 4000,
-}
 
 function handle(middleware) { 
     return async (req, res) => { 
@@ -31,12 +23,40 @@ function handle(middleware) {
     }
 }
 
-app.get('/list', /*passport.authenticate('local'),*/ handle(c.listStations));
-app.post('/refresh', handle(c.refreshStationInfo));
-app.post('/add', c.addStation);
-app.post('/edit', handle(c.editStation));
-app.post('/report', handle(c.runDiagnostics));
-app.post('/delete',handle(c.deleteStation))
+app.get('/list', handle(c.listStations));
+app.post('/refresh', auth.required ,handle(c.refreshStationInfo));
+app.post('/add', auth.required , c.addStation);
+app.post('/edit', auth.required , handle(c.editStation));
+app.post('/report', auth.required , handle(c.runDiagnostics));
+app.post('/delete', auth.required ,handle(c.deleteStation))
+
+app.get('/users/login', function(req, res, next){
+    if(!req.query.username){
+      return res.status(422).json({errors: {username: "can't be blank"}});
+    }
+  
+    if(!req.query.password){
+      return res.status(422).json({errors: {password: "can't be blank"}});
+    }
+  
+    passport.authenticate('local', {session: false}, function(err, user, info){
+      if(err){ return next(err); }
+  
+      if(user){
+        return res.json(user.toAuthJSON());
+      } else {
+        return res.status(422).json(info);
+      }
+    })(req, res, next);
+});
+
+app.get('/user', auth.required, function(req, res, next){
+    User.findById(req.payload.id).then(function(user){
+      if(!user){ return res.sendStatus(401); }
+  
+      return res.json({user: user.toAuthJSON()});
+    }).catch(next);
+  });
 
 // module.parent check is required to support mocha watch
 // src: https://github.com/mochajs/mocha/issues/1912
