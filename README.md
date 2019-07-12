@@ -18,16 +18,15 @@ The scripts are to be loaded on the capture stations
 
 **Note:  Coop requires mongodb to be running** 
 
-To run coop, first navigate to the `coop` folder 
+To run coop, first navigate to the `coop` folder
 
 `cd coop`
-
 
 If this is the first time you are running it, download the dependencies with yarn
 
 `yarn`
 
-Run the server 
+Run the server
 
 `yarn start`
 
@@ -45,10 +44,12 @@ Run the dashboard
 
 `yarn start`
 
-# Blog 
+## Blog 
 
 This is my project as a Google Summer of Code 2019 student for Red Hen Labs. I maintain a weekly summary of activities here.
 
 1. [**Google Summer of Code '19 - The application process**](https://medium.com/@animysore/gsoc-19-the-application-process-and-being-accepted-30ce8d134951)
 2. [**Week 1**](https://medium.com/@animysore/google-summer-of-code-2019-week-1-9dbaf8572c24)
-2. [**Week 2**](https://medium.com/@animysore/google-summer-of-code-2019-week-2-d5af857a5b80)
+3. [**Week 2**](https://medium.com/@animysore/google-summer-of-code-2019-week-2-d5af857a5b80)
+4. [**Week 3 and 4**](https://medium.com/@animysore/gsoc19-week-3-and-4-95ba4ba5142f)
+5. [**First Evaluation and Week 5**](https://medium.com/@animysore/first-evaluation-for-google-summer-of-code-19-f58b33264d9f)

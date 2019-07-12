@@ -16,6 +16,8 @@ class Control {
      */
     async refreshStationInfo(req, res) {
         const station = await Station.findOne({_id: req.body._id}).exec();
+        if (! station) res.status(400).json({"error":"Station not found"});
+
         const tele = new Telemetry(station);
         const date = await tele.statusCheck();
         station.lastChecked = new Date();
@@ -68,6 +70,8 @@ class Control {
     async editStation(req, res) {
         const { _id, name, location, host, port, username } = req.body;
         const station = await Station.findOne({_id: _id}).exec();
+        if (! station) res.status(400).json({"error":"Station not found"});
+
         station.name = name;
         station.location = location;
         station.host = host;
@@ -82,6 +86,8 @@ class Control {
      */
     async deleteStation(req, res) {
         const station = await Station.findOneAndDelete({_id:req.body._id}).exec();
+        if (! station) res.status(400).json({"error":"Station not found"});
+
         res.json(station);
     }
 }
