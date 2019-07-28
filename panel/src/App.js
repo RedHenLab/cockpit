@@ -1,10 +1,13 @@
 import React from 'react';
-import { CssBaseline, Grid } from '@material-ui/core/';
-import StationTable from './StationTable';
-import InfoPanel from './InfoPanel';
+import { CssBaseline, Grid, Button, Typography } from '@material-ui/core/';
+import StationTable from './components/Table';
+import InfoPanel from './components/DetailedInfo';
+import LoginCard from './components/Login';
 import Logo from './logo.png'
-import Notification from './Notification';
-import {list, refresh, edit} from './config';
+import Notification from './components/Notification';
+import {list, refresh, edit, report} from './config';
+import API from './services/API';
+import JWT from './services/JWT';
 import './App.css';
 
 
@@ -12,53 +15,72 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: null,
       stations: [],
-      selected: 0,
+      selected: null,
       notification: {
         open: false,
         message: '',
       }
     }
-    fetch(list)
-    .then((res) => {
-        return res.json();
-    })
-    .then((stations) => {
-        this.setState({stations});
-    });
   }
 
-  refreshStation = (id) => {
-    fetch(refresh, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        stationId: id
+  componentDidMount() {
+    const token = JWT.getToken();
+    if (token) {
+      API.token = token;
+      this.setState({user: {token} })
+
+      API.get(list, true)
+      .then((res) => {
+          return res.json();
       })
-    })
+      .then((stations) => {
+          this.setState({stations});
+      })
+      .catch( err => console.log(err));
+    }
+   }
+
+  refreshStation = (id) => {
+    API.post(refresh, {_id: id})
     .then((stn)=> {
       const stations = this.state.stations;
       const index = stations.findIndex(s => s._id === stn._id);
       stations[index] = stn;
-      this.setState({stations});
+      const notification = { 
+        open: true,
+        message: 'Refreshed station. If UI has not updated, please reload'
+      }
+      this.setState({stations, selected: null, notification});
     });
   }
+
+  getReport = (selected) => {
+    API.post(report, { _id: selected._id })
+    .then(res => res.json())
+    .then(report=> this.setState({report: report[0]}))
+    .catch();
+  }
+
+  generateReport = (_id) => {
+    const notification = { 
+      open: true,
+      message: 'Generated a new report. If UI has not updated, please reload'
+    }
+    API.post(report, { _id, provideLatest: true })
+    .then(res => res.json())
+    .then(report=> this.setState({report: report[0], selected: null, notification}))
+    .catch();
+  } 
 
   updateStation = (station) => {
     let notification = {
       open:true
     };
-    fetch(edit, { 
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ station })  
-    })
+    API.post(edit, { station })
      .then((res) => {
-       if (res.status === 200) { 
+       if (res.status === 200) {
           notification.message = 'Station updated.';
        }
        else {notification.message = 'Error. Could not update station.';}
@@ -72,52 +94,75 @@ class App extends React.Component {
      });
   }
 
+
   setSelection = (selected) => {
     this.setState({selected});
-  }
-  clearSelection = ( ) => {
-    this.setState({selected:null});
-  }
+    this.getReport(selected);
+  };
 
+  clearSelection = ( ) => this.setState({selected:null});
+
+  setUser = (user) => this.setState({user});
+
+  logout = () => {
+    this.setState({user:null});
+    JWT.clearToken();
+  }
   handleNotificationClose = ( ) => { 
     const notification = this.state.notification;
     notification.open = false;
     this.setState({notification});
   }
   render() {
-    const {stations, selected, notification} = this.state;
+    const {stations, selected, report, notification} = this.state;
     return (
       <>
         <CssBaseline />
         <div style={{padding: 20}}> 
-          <Grid container>
+          <Grid container justify="center">
             <Grid item xs={12}>
               <Grid container alignItems="center">
                 <Grid item>
                   <img src={Logo} alt=""/>
                 </Grid>
-                <Grid item>
-                  <h1>Cockpit</h1>
-                  <h2>Capture Station Monitoring System</h2>
+                <Grid item xs={10}>
+                  <Typography variant="h2"> Cockpit </Typography>
+                  <Typography variant="h5">Capture Station Monitoring System</Typography>
                 </Grid>
+                {this.state.user &&
+                  <Grid item>
+                    <Button variant="contained" color="secondary" onClick={this.logout}>Logout</Button>
+                  </Grid>
+                }
               </Grid>
             </Grid>
-            <Grid item xs={5} style={{padding: 20}}>
-              <InfoPanel
-                stations={stations}
-                selected={selected}
-                refreshStation={this.refreshStation}
-                updateStation={this.updateStation}
-              />
-            </Grid>
-            <Grid item xs={7} style={{padding: 20}}>
-              <StationTable 
-                stations={stations}
-                selected={selected}
-                setSelection={this.setSelection}
-                clearSelection={this.clearSelection}
-              />
-            </Grid>
+            {!this.state.user && 
+              <Grid item xs={5} style={{padding: 20}}>
+                <LoginCard setUser={this.setUser}/>
+              </Grid>
+            }
+            {this.state.user && 
+            <>
+              <Grid item xs={5} style={{padding: 20}}>
+                <InfoPanel
+                  stations={stations}
+                  selected={selected}
+                  report={report}
+                  refreshStation={this.refreshStation}
+                  updateStation={this.updateStation}
+                  generateReport={this.generateReport}
+                  />
+              </Grid>
+              <Grid item xs={7} style={{padding: 20}}>
+                <StationTable 
+                  stations={stations}
+                  selected={selected}
+                  setSelection={this.setSelection}
+                  clearSelection={this.clearSelection}
+                  />
+              </Grid> 
+            </>
+            }
           </Grid>
           <Notification open={notification.open} message={notification.message} handleClose={this.handleNotificationClose}/>
         </div>

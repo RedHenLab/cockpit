@@ -15,6 +15,7 @@ const auth = {
     userProperty: 'payload',
     getToken: getTokenFromHeader
   }),
+  // TODO: remove optional call
   optional: jwt({
     secret: secret,
     userProperty: 'payload',

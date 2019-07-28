@@ -14,11 +14,12 @@ let StationSchema = new mongoose.Schema({
     location: String,
     host: String,
     port: String,
-    username: String,
-    password: String,
+    username: String, //TODO: change to SSH_Username
+    password: String, //TODO: delete
     lastChecked: Date,
     lastBackup: Date,
     onlineSince: Date,
+    // TODO : person incharge of station,
 })
 
 StationSchema.statics = {

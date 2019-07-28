@@ -1,7 +1,8 @@
 const node_ssh = require('node-ssh');
 const SSHConfig = require('ssh-config');
-const fs = require('fs')
+const path = require('path');
 
+const fs = require('fs')
 /**
  * @class Telemetry 
  * Provides interface to communicate with capture stations
@@ -10,13 +11,13 @@ class Telemetry {
     /**
      *  @param {Station} station - contains hostname that can be read from ssh config file 
      */
-    constructor(station) { 
-        const conf = SSHConfig.parse(fs.readFileSync('/home/aniruddha/.ssh/config', 'utf8'));
+    constructor(station) {
+        const conf = SSHConfig.parse(fs.readFileSync(path.resolve(__dirname,'./../config/sshconfig'), 'utf8'));
         const cred = conf.compute('cartago');
         this.credential = {
             host:cred.Hostname, 
             username: cred.User, 
-            privateKey: require('fs').readFileSync('/home/aniruddha/.ssh/id_rsa', 'utf8') 
+            privateKey: require('fs').readFileSync(path.resolve(__dirname,'./../config/id_rsa'), 'utf8') 
         }
     }
 

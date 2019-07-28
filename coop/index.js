@@ -7,7 +7,7 @@ const User = require('./models/user.model');
 const config = require('./config');
 const auth = require('./config/auth');
 
-mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
+mongoose.connect(config.mongo, {useNewUrlParser: true});
 
 const c = new Control();
 
@@ -23,7 +23,7 @@ function handle(middleware) {
     }
 }
 
-app.get('/list', handle(c.listStations));
+app.get('/list', auth.required, handle(c.listStations));
 app.post('/refresh', auth.required ,handle(c.refreshStationInfo));
 app.post('/add', auth.required , c.addStation);
 app.post('/edit', auth.required , handle(c.editStation));

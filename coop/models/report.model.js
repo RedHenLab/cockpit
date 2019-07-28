@@ -20,6 +20,10 @@ let ReportSchema = new mongoose.Schema({
         name: String,
         used: Number
     }],
+    downtimes: [{
+        start: Date,
+        end: Date
+    }],
     hdhomerun_devices: [{
         id: String,
         ip: String

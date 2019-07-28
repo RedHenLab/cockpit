@@ -15,7 +15,7 @@ let UserSchema = new mongoose.Schema({
     email: String,
     role: String,
     hash: String,
-    salt: String
+    salt: String // TODO : person incharge of station, email and telephone, last login timestamp
 })
 
 /**

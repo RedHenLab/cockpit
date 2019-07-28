@@ -4,11 +4,13 @@ require('dotenv').config();
 expect(process.env).to.have.property('PORT');
 expect(process.env).to.have.property('JWTSECRET');
 expect(process.env).to.have.property('ENVIRONMENT');
+expect(process.env).to.have.property('MONGOURI');
 
 let config = {
     port: process.env.PORT,
     secret: process.env.JWTSECRET,
-    environment: process.env.ENVIRONMENT
+    environment: process.env.ENVIRONMENT,
+    mongo: process.env.MONGOURI
 }
 
 if (process.env.ENVIRONMENT === 'dev') {

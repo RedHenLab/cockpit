@@ -37,19 +37,32 @@ class Control {
      */
     async runDiagnostics(req, res) {
         const station = await Station.findOne({_id: req.body._id}).exec();
-        const tele = new Telemetry(station)
-        const freshReport = await tele.healthCheck();
-  
-        const report = new Report();
-        report.stationId = req.body._id;
-        report.disks = freshReport.storage.disks;
-        report.cards = freshReport.storage.cards;
-        report.hdhomerun_devices = freshReport.hdhomerun_devices;
-        report.security = freshReport.security;
-        report.errors = freshReport.errors;
-
-        await report.save()
-        res.json(report);
+        if (req.body.hasOwnProperty('provideLatest') && req.body.provideLatest == true) {
+            const tele = new Telemetry(station)
+            const freshReport = await tele.healthCheck();
+            const report = new Report();
+            report.stationId = req.body._id;
+            report.disks = freshReport.storage.disks;
+            report.cards = freshReport.storage.cards;
+            report.hdhomerun_devices = freshReport.hdhomerun_devices;
+            report.security = freshReport.security;
+            report.errors = freshReport.errors;    
+            if (freshReport.downtimes) {
+                const downtimes = [];
+                for (const downtime of freshReport.downtimes) { 
+                    const start = Date(Number.parseInt(downtime.start)*1000);
+                    const end = Date(Number.parseInt(downtime.end)*1000);
+                    downtimes.push({start, end});
+                }
+                report.downtimes = downtimes;
+            } 
+            await report.save();
+            res.json(report);
+        }
+        else { 
+            const report = await Report.find({stationId: req.body._id}).limit(1).sort({'$natural':-1});
+            res.json(report);
+        }
     }
 
     /**
