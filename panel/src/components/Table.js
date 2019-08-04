@@ -3,14 +3,13 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { withStyles, Tooltip, Paper, Radio, Typography, IconButton } from '@material-ui/core/';
 import { Table, TableBody, TableCell, TableHead, TableRow, Toolbar } from '@material-ui/core';
-import { SignalCellularAlt, Memory, Close } from '@material-ui/icons';
+import { Check, Memory, Close } from '@material-ui/icons';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
 import moment from 'moment';
 
 const styles = theme => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing.unit * 3,
     overflowX: 'auto',
   },
   table: {
@@ -24,10 +23,9 @@ function formatDate(date) {
 }
 
 function Icon(isOnline) {
-    const color = isOnline ? "primary" : "secondary";
-    return (
-            <SignalCellularAlt color={color}/>  
-    )
+    return (isOnline) ?
+       <Check color={"primary"}/>  
+    :  <Close color={"secondary"} />
 }
   
 const toolbarStyles = theme => ({
@@ -116,7 +114,7 @@ class StationTable extends React.Component {
         const {classes, stations} = this.props;
         const {selected} = this.state;
         return (
-            <Paper className={classes.root}>
+            <Paper className={classes.root} elevation={1}>
                 <EnhancedTableToolbar selected={selected} handleClose={this.handleClose} />
                 <Table className={classes.table}>
                     <TableHead>

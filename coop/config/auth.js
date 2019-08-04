@@ -9,19 +9,10 @@ function getTokenFromHeader(req){
   return null;
 }
 
-const auth = {
-  required: jwt({
+const auth = jwt({
     secret: secret,
     userProperty: 'payload',
     getToken: getTokenFromHeader
-  }),
-  // TODO: remove optional call
-  optional: jwt({
-    secret: secret,
-    userProperty: 'payload',
-    credentialsRequired: false,
-    getToken: getTokenFromHeader
-  })
-};
+});
 
 module.exports = auth;

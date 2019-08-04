@@ -20,10 +20,14 @@ let ReportSchema = new mongoose.Schema({
         name: String,
         used: Number
     }],
-    downtimes: [{
-        start: Date,
-        end: Date
-    }],
+    network: {
+        log_start: Date,
+        log_end: Date,
+        downtimes: [{
+            start: Date,
+            end: Date
+        }],
+    },
     hdhomerun_devices: [{
         id: String,
         ip: String
@@ -31,6 +35,8 @@ let ReportSchema = new mongoose.Schema({
     security: {
         failed_login: Number
     },
+    generated_at: Date,
+    fetched_at: Date,
     errorsLog: []
 })
 

@@ -59,8 +59,9 @@ class LoginCard extends React.Component {
     .then(res => res.json())
     .then((user) => {
       if (user) {
-        this.props.setUser(user);
+        API.token = user.token;
         JWT.saveToken(user.token);
+        this.props.setUser(user);
       }
       else { 
         // TODO: Failed login message
@@ -68,6 +69,16 @@ class LoginCard extends React.Component {
     })
     .catch( (err) => { 
         // TODO : Fail message
+        if (err.status === 422) {
+          err.json()
+            .then(res => { 
+              this.props.raiseNotification(res.message);
+            })
+            .catch(() => { 
+              this.props.raiseNotification('Login error. Please try again.')
+            })
+        }
+        else this.props.raiseNotification('Could not login! Please check your connection')
     });
   }
   
@@ -78,8 +89,10 @@ class LoginCard extends React.Component {
         <Card className={classes.card}>
             <CardHeader title={'Login to Cockpit'}/>
             <CardContent>
-                <Grid container>
+            <form>
+              <Grid container>
                 <Grid item className={classes.vertical}>
+                  
                     <TextField
                     label="Username"
                     onChange={(event) => this.handleChange(event,'username')}
@@ -107,7 +120,8 @@ class LoginCard extends React.Component {
                         }}
                     />
                 </Grid>
-                </Grid>
+              </Grid>
+            </form>
             </CardContent>
             <CardActions>
             <Button size="small" onClick={this.signIn}>Login</Button> 
@@ -119,7 +133,8 @@ class LoginCard extends React.Component {
 
 LoginCard.propTypes = {
   classes: PropTypes.object.isRequired,
-  setUser: PropTypes.func.isRequired
+  setUser: PropTypes.func.isRequired,
+  raiseNotification: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(LoginCard);

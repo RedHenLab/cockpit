@@ -22,21 +22,27 @@ function handle(middleware) {
         }
     }
 }
+app.get('/list', auth, handle(c.listStations));
+app.post('/refresh', auth ,handle(c.refreshStationInfo));
+app.post('/add', auth , c.addStation);
+app.post('/edit', auth , handle(c.editStation));
+app.post('/report', auth , handle(c.runDiagnostics));
+app.post('/delete', auth ,handle(c.deleteStation))
 
-app.get('/list', auth.required, handle(c.listStations));
-app.post('/refresh', auth.required ,handle(c.refreshStationInfo));
-app.post('/add', auth.required , c.addStation);
-app.post('/edit', auth.required , handle(c.editStation));
-app.post('/report', auth.required , handle(c.runDiagnostics));
-app.post('/delete', auth.required ,handle(c.deleteStation))
+app.use(function(err, req, res, next){
+  if(err.name === 'UnauthorizedError') { 
+    res.status(err.status).send({message: err.message});
+    return;
+  }
+})
 
 app.get('/users/login', function(req, res, next){
     if(!req.query.username){
-      return res.status(422).json({errors: {username: "can't be blank"}});
+      return res.status(422).json({message: "Username can't be blank"});
     }
   
     if(!req.query.password){
-      return res.status(422).json({errors: {password: "can't be blank"}});
+      return res.status(422).json({message: "Password can't be blank"});
     }
   
     passport.authenticate('local', {session: false}, function(err, user, info){
@@ -50,7 +56,7 @@ app.get('/users/login', function(req, res, next){
     })(req, res, next);
 });
 
-app.get('/user', auth.required, function(req, res, next){
+app.get('/user', auth, function(req, res, next){
     User.findById(req.payload.id).then(function(user){
       if(!user){ return res.sendStatus(401); }
   

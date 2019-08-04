@@ -15,6 +15,7 @@ import sys
 import json
 import pprint
 import subprocess
+from datetime import datetime
 
 data = {
     'storage': {
@@ -24,9 +25,14 @@ data = {
     'security': {
         'failed_login': 0,
     },
-    'downtimes': [],
+    'network': {
+        'log_start': 0,
+        'log_end': 0,
+        'downtimes': []
+    },
     'hdhomerun_devices': [],
-    'errors': []
+    'errors': [],
+    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 }
 
 """
@@ -138,10 +144,13 @@ try:
     with open('./pings.log', 'r+') as logfile:
         down = False
         last = None
-        for line in logfile.read().split('\n'):
+        for i,line in enumerate(logfile.read().split('\n')):
 
             # skip last line
             if not line: continue
+
+            # store starting timestamp of log
+            if i==0: data['network']['log_start'] = line.split('\t')[0]
 
             # store line; used to catch the last non empty line of file
             last = line
@@ -155,11 +164,14 @@ try:
                 if down:
                     down = False
                     end = time
-                    data['downtimes'].append({
+                    data['network']['downtimes'].append({
                         'start': start,
                         'end': end
                     })
         
+        # store ending timestamp of log
+        data['network']['log_end'] = last.split('\t')[0]
+
         # if last non empty line is UP truncate file
         if last and last.split('\t')[1] == 'UP':
             logfile.truncate(0)

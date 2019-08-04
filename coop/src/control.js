@@ -46,15 +46,20 @@ class Control {
             report.cards = freshReport.storage.cards;
             report.hdhomerun_devices = freshReport.hdhomerun_devices;
             report.security = freshReport.security;
-            report.errors = freshReport.errors;    
-            if (freshReport.downtimes) {
+            report.errors = freshReport.errors;
+            // TODO: decide created at 
+            report.generated_at = freshReport.created_at;
+            report.fetched_at = new Date();
+            report.network.log_start = new Date(Number.parseInt(freshReport.network.log_start)*1000);
+            report.network.log_end = new Date(Number.parseInt(freshReport.network.log_end)*1000);
+            if (freshReport.network.downtimes) {
                 const downtimes = [];
-                for (const downtime of freshReport.downtimes) { 
-                    const start = Date(Number.parseInt(downtime.start)*1000);
-                    const end = Date(Number.parseInt(downtime.end)*1000);
+                for (const downtime of freshReport.network.downtimes) { 
+                    const start = new Date(Number.parseInt(downtime.start)*1000);
+                    const end = new Date(Number.parseInt(downtime.end)*1000);
                     downtimes.push({start, end});
                 }
-                report.downtimes = downtimes;
+                report.network.downtimes = downtimes;
             } 
             await report.save();
             res.json(report);
@@ -69,8 +74,8 @@ class Control {
      * Add a new capture station to DB
      */
     addStation(req, res) {
-        const { name, location, host, port, username } = req.body;
-        Station.create({ name, location, host, port, username }, (err, obj) => {
+        const { name, location, host, port, ssh_username, incharge_email, incharge_name } = req.body;
+        Station.create({ name, location, host, port, ssh_username, incharge_email, incharge_name }, (err, obj) => {
             if (err) res.status(400).json(err);
             else res.json(obj);
         });
@@ -78,18 +83,20 @@ class Control {
 
     /**
      * Edit an existing capture station
-     * name, location, host, port and username are editable
+     * name, location, host, port and ssh_username are editable
     */
     async editStation(req, res) {
-        const { _id, name, location, host, port, username } = req.body;
-        const station = await Station.findOne({_id: _id}).exec();
+        const { _id, name, location, host, port, ssh_username, incharge_name, incharge_email } = req.body;
+        const station = await Station.findOne({_id}).exec();
         if (! station) res.status(400).json({"error":"Station not found"});
 
         station.name = name;
         station.location = location;
         station.host = host;
         station.port = port;
-        station.username = username;
+        station.ssh_username = ssh_username;
+        station.incharge_name = incharge_name;
+        station.incharge_email = incharge_email;
         await station.save();
         res.json(station);
     }

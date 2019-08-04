@@ -5,7 +5,7 @@ import InfoPanel from './components/DetailedInfo';
 import LoginCard from './components/Login';
 import Logo from './logo.png'
 import Notification from './components/Notification';
-import {list, refresh, edit, report} from './config';
+import {list, add, refresh, edit, report, remove} from './config';
 import API from './services/API';
 import JWT from './services/JWT';
 import './App.css';
@@ -15,6 +15,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      add: false,
       user: null,
       stations: [],
       selected: null,
@@ -29,16 +30,8 @@ class App extends React.Component {
     const token = JWT.getToken();
     if (token) {
       API.token = token;
-      this.setState({user: {token} })
-
-      API.get(list, true)
-      .then((res) => {
-          return res.json();
-      })
-      .then((stations) => {
-          this.setState({stations});
-      })
-      .catch( err => console.log(err));
+      this.setState({user: {token} });
+      this.listStations();
     }
    }
 
@@ -48,12 +41,62 @@ class App extends React.Component {
       const stations = this.state.stations;
       const index = stations.findIndex(s => s._id === stn._id);
       stations[index] = stn;
-      const notification = { 
-        open: true,
-        message: 'Refreshed station. If UI has not updated, please reload'
-      }
-      this.setState({stations, selected: null, notification});
+      this.setState({stations, selected: null});
+      this.raiseNotification('Refreshed station. If UI has not updated, please reload');
+    })
+    .catch(err => {
+      this.raiseNotification('Could not refresh station.');
+      console.log(err);
     });
+  }
+
+  listStations() { 
+    API.get(list, true)
+    .then(res => res.json())
+    .then(stations => this.setState({stations}))
+    .catch( err => {
+      this.setState({notification: {open:true, message: 'Your session has expired. Please login again'}});
+    });
+  }
+
+  addStation = (station) => {
+    API.post(add,station)
+    .then(() => {
+      this.raiseNotification('Added successfully');
+      this.listStations();
+    })
+    .catch(err => {
+      this.raiseNotification('Could not add new station.');
+      console.log(err);
+    })
+  }
+
+  updateStation = (station) => {
+    API.post(edit, station)
+     .then((res) => {
+       if (res.status === 200) {
+          this.raiseNotification('Station updated.');
+       }
+       else {this.raiseNotification('Error. Could not update station.'); }
+     })
+     .catch((err) => {
+        this.raiseNotification('Error. Could not update station.');
+        console.error(err);
+     });
+  }
+  deleteStation = (id) => {
+    API.post(remove, {_id: id})
+      .then(() => {
+        const stations = this.state.stations;
+        const index =  stations.findIndex(s => s._id === id);
+        stations.splice(index,1);
+        this.setState({stations});
+        this.raiseNotification('Deleted station.');
+      })
+      .catch((err) => {
+        // TODO: Add err.json() part to API
+        this.raiseNotification('Could not delete station');
+      })
   }
 
   getReport = (selected) => {
@@ -72,28 +115,7 @@ class App extends React.Component {
     .then(res => res.json())
     .then(report=> this.setState({report: report[0], selected: null, notification}))
     .catch();
-  } 
-
-  updateStation = (station) => {
-    let notification = {
-      open:true
-    };
-    API.post(edit, { station })
-     .then((res) => {
-       if (res.status === 200) {
-          notification.message = 'Station updated.';
-       }
-       else {notification.message = 'Error. Could not update station.';}
-     })
-     .catch((err) => {
-        notification.message = 'Error. Could not update station.';
-        console.error(err);
-     })
-     .finally(() => {
-      this.setState({notification})
-     });
   }
-
 
   setSelection = (selected) => {
     this.setState({selected});
@@ -102,35 +124,41 @@ class App extends React.Component {
 
   clearSelection = ( ) => this.setState({selected:null});
 
-  setUser = (user) => this.setState({user});
+  setUser = (user) => {
+    this.setState({user});
+    this.listStations();
+  };
 
   logout = () => {
     this.setState({user:null});
     JWT.clearToken();
   }
-  handleNotificationClose = ( ) => { 
+  raiseNotification = (message) => this.setState({notification: {open:true, message}});
+
+  handleNotificationClose = () => { 
     const notification = this.state.notification;
     notification.open = false;
     this.setState({notification});
   }
   render() {
-    const {stations, selected, report, notification} = this.state;
+    const {stations, selected, report, notification, add} = this.state;
     return (
       <>
         <CssBaseline />
         <div style={{padding: 20}}> 
           <Grid container justify="center">
-            <Grid item xs={12}>
+            <Grid item xs={12}  style={{padding: 20}}>
               <Grid container alignItems="center">
                 <Grid item>
                   <img src={Logo} alt=""/>
                 </Grid>
-                <Grid item xs={10}>
+                <Grid item xs={8}>
                   <Typography variant="h2"> Cockpit </Typography>
                   <Typography variant="h5">Capture Station Monitoring System</Typography>
                 </Grid>
                 {this.state.user &&
                   <Grid item>
+                    <Button style={{marginRight:10}} variant="contained" onClick={() => this.setState({add: true})}> Add new station </Button>
                     <Button variant="contained" color="secondary" onClick={this.logout}>Logout</Button>
                   </Grid>
                 }
@@ -138,22 +166,26 @@ class App extends React.Component {
             </Grid>
             {!this.state.user && 
               <Grid item xs={5} style={{padding: 20}}>
-                <LoginCard setUser={this.setUser}/>
+                <LoginCard raiseNotification={this.raiseNotification} setUser={this.setUser}/>
               </Grid>
             }
             {this.state.user && 
             <>
-              <Grid item xs={5} style={{padding: 20}}>
+              <Grid item md={5} xs={12} style={{padding: 20}}>
                 <InfoPanel
+                  add={add}
                   stations={stations}
                   selected={selected}
                   report={report}
                   refreshStation={this.refreshStation}
                   updateStation={this.updateStation}
                   generateReport={this.generateReport}
+                  deleteStation={this.deleteStation}
+                  clearSelection={this.clearSelection}
+                  addStation={this.addStation}
                   />
               </Grid>
-              <Grid item xs={7} style={{padding: 20}}>
+              <Grid item md={7} xs={12} style={{padding: 20}}>
                 <StationTable 
                   stations={stations}
                   selected={selected}

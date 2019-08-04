@@ -14,8 +14,9 @@ let StationSchema = new mongoose.Schema({
     location: String,
     host: String,
     port: String,
-    username: String, //TODO: change to SSH_Username
-    password: String, //TODO: delete
+    ssh_username: String, //TODO: change to SSH_Username
+    incharge_name: String,
+    incharge_email: String,
     lastChecked: Date,
     lastBackup: Date,
     onlineSince: Date,
@@ -32,8 +33,8 @@ StationSchema.statics = {
                 let stations = await this.find().lean().exec();
                 stations = stations.map( (station) => {
                     const isOnline = (station.lastChecked)? (( Date.now() - station.lastChecked ) < uptimeThreshold): false;
-                    const { _id, name, location, host, port, username, lastBackup, lastChecked, onlineSince} = station;
-                    return { _id, name, location, host, port, username, lastBackup, lastChecked, isOnline, onlineSince};
+                    const { _id, name, location, host, port, ssh_username, lastBackup, lastChecked, onlineSince, incharge_name, incharge_email} = station;
+                    return { _id, name, location, host, port, ssh_username, lastBackup, lastChecked, isOnline, onlineSince,  incharge_name, incharge_email};
                 });
                 resolve(stations);
             }
