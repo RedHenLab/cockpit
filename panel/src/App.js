@@ -1,9 +1,9 @@
 import React from 'react';
-import { CssBaseline, Grid, Button, Typography } from '@material-ui/core/';
+import { CssBaseline, Grid } from '@material-ui/core/';
 import StationTable from './components/Table';
 import InfoPanel from './components/DetailedInfo';
 import LoginCard from './components/Login';
-import Logo from './logo.png'
+import Header from './components/Header';
 import Notification from './components/Notification';
 import {list, add, refresh, edit, report, remove} from './config';
 import API from './services/API';
@@ -15,7 +15,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      add: false,
+      screen: 'home',
       user: null,
       stations: [],
       selected: null,
@@ -124,6 +124,8 @@ class App extends React.Component {
 
   clearSelection = ( ) => this.setState({selected:null});
 
+  switchScreen = (screen) => this.setState({screen});
+
   setUser = (user) => {
     this.setState({user});
     this.listStations();
@@ -141,31 +143,23 @@ class App extends React.Component {
     this.setState({notification});
   }
   render() {
-    const {stations, selected, report, notification, add} = this.state;
+    const {stations, selected, report, notification, screen} = this.state;
+
     return (
       <>
         <CssBaseline />
-        <div style={{padding: 20}}> 
+        <div> 
           <Grid container justify="center">
+            {/* TODO: Make padding responsive */}
             <Grid item xs={12}  style={{padding: 20}}>
-              <Grid container alignItems="center">
-                <Grid item>
-                  <img src={Logo} alt=""/>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography variant="h2"> Cockpit </Typography>
-                  <Typography variant="h5">Capture Station Monitoring System</Typography>
-                </Grid>
-                {this.state.user &&
-                  <Grid item>
-                    <Button style={{marginRight:10}} variant="contained" onClick={() => this.setState({add: true})}> Add new station </Button>
-                    <Button variant="contained" color="secondary" onClick={this.logout}>Logout</Button>
-                  </Grid>
-                }
-              </Grid>
+              <Header 
+                logout={this.logout}
+                user={this.state.user}
+                switchScreen={this.switchScreen}
+              />
             </Grid>
             {!this.state.user && 
-              <Grid item xs={5} style={{padding: 20}}>
+              <Grid item style={{padding: 20}}>
                 <LoginCard raiseNotification={this.raiseNotification} setUser={this.setUser}/>
               </Grid>
             }
@@ -173,7 +167,7 @@ class App extends React.Component {
             <>
               <Grid item md={5} xs={12} style={{padding: 20}}>
                 <InfoPanel
-                  add={add}
+                  screen={screen}
                   stations={stations}
                   selected={selected}
                   report={report}

@@ -61,7 +61,7 @@ class Report extends React.Component {
                   <ListItemText primary='Memory Card' />
                 </ListItem>
                 {report.cards.map(r => <ListItem key={r._id}>
-                  <ListItemText primary={r.name} secondary={`${formatSize(r.available, 'GB')} GB out of ${formatSize(r.available + r.used, 'GB')} GB available`} />
+                  <ListItemText primary={r.name} secondary={`${formatSize(r.available, 'GB')} MB out of ${formatSize(r.available + r.used, 'GB')} MB available`} />
                 </ListItem>)}
               </Card>
             </Grid>

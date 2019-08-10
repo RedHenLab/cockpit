@@ -37,7 +37,7 @@ class Control {
      */
     async runDiagnostics(req, res) {
         const station = await Station.findOne({_id: req.body._id}).exec();
-        if (req.body.hasOwnProperty('provideLatest') && req.body.provideLatest == true) {
+        if (req.body.hasOwnProperty('provideLatest') && req.body.provideLatest === true) {
             const tele = new Telemetry(station)
             const freshReport = await tele.healthCheck();
             const report = new Report();
@@ -64,7 +64,11 @@ class Control {
             await report.save();
             res.json(report);
         }
-        else { 
+        else if (req.body.hasOwnProperty('archive') && req.body.archive === true) {
+            const report = await Report.find({stationId: req.body._id}).sort({'$natural':-1});
+            res.json(report);
+        }
+        else {
             const report = await Report.find({stationId: req.body._id}).limit(1).sort({'$natural':-1});
             res.json(report);
         }

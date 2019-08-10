@@ -47,7 +47,7 @@ class Edit extends React.Component {
             variant="outlined"
             disabled={disableMetadataEdit}
           />
-          <Typography component="p" gutterBottom>Station Incharge</Typography>
+          <Typography component="p" gutterBottom>Person Incharge</Typography>
           <TextField
             label="Name"
             value={disableMetadataEdit ? incharge_name: station.incharge_name}
@@ -69,7 +69,7 @@ class Edit extends React.Component {
             ) : (
               <>
                 <Button onClick={( ) => this.setState({disableMetadataEdit: true, station:selected})}> Cancel </Button>
-                <Button onClick={( ) => updateStation(this.state.station)}> Save </Button>
+                <Button onClick={( ) => { this.setState({disableMetadataEdit: true }); updateStation(this.state.station); }}> Save </Button>
               </>
             )
           }
@@ -106,7 +106,7 @@ class Edit extends React.Component {
               <>
                 <Button onClick={( ) => this.setState({disableConfigEdit: true})}> Cancel </Button>
                 <Button disabled> Test Config </Button>
-                <Button onClick={( ) => updateStation(this.state.station)}> Save </Button>
+                <Button onClick={( ) =>{this.setState({disableConfigEdit:true}); updateStation(this.state.station)}}> Save </Button>
               </>
             ) 
           }

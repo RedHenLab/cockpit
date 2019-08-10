@@ -3,8 +3,11 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { withStyles, Tooltip, Paper, Radio, Typography, IconButton } from '@material-ui/core/';
 import { Table, TableBody, TableCell, TableHead, TableRow, Toolbar } from '@material-ui/core';
-import { Check, Memory, Close } from '@material-ui/icons';
+import { Check, Memory, Close, Error } from '@material-ui/icons';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
+import { green, red } from '@material-ui/core/colors';
+
+
 import moment from 'moment';
 
 const styles = theme => ({
@@ -14,8 +17,8 @@ const styles = theme => ({
   },
   table: {
     minWidth: 700,
+    overflowX: 'auto'
   },
-
 });
 
 function formatDate(date) {
@@ -24,8 +27,8 @@ function formatDate(date) {
 
 function Icon(isOnline) {
     return (isOnline) ?
-       <Check color={"primary"}/>  
-    :  <Close color={"secondary"} />
+       <Check style={{color:green[500]}}/>  
+    :  <Error style={{color:red[500]}} />
 }
   
 const toolbarStyles = theme => ({

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles, Card, CardHeader, CardActions, CardContent, Button, 
-        Typography, CircularProgress  } from '@material-ui/core/';
+        Typography, CircularProgress } from '@material-ui/core/';
 import { Memory } from '@material-ui/icons';
 import Edit from './Edit';
 import Report from './Report';
@@ -23,6 +23,9 @@ const styles = {
   },
   icon: {
     fontSize: 70,
+  },
+  actions: {
+    overflowX: 'auto',
   }
 };
 
@@ -40,8 +43,8 @@ class InfoPanel extends React.Component {
   }
 
   render() {
-    const { classes, add, selected, report, refreshStation, generateReport, addStation, updateStation, deleteStation } = this.props;
-    if (add) { 
+    const { classes, screen, selected, report, refreshStation, generateReport, addStation, updateStation, deleteStation } = this.props;
+    if (screen==='add') {
       return (
         <Card>
           <CardHeader title="Add a new station"/>
@@ -52,13 +55,20 @@ class InfoPanel extends React.Component {
           
       )
     }
-    else if (selected) {
+    else if(screen==='archive') {
+      return (
+        <>
+
+        </>
+      )
+    }
+    else if (screen==='home' && selected) {
         const {_id, name, location, lastChecked, lastBackup, onlineSince, isOnline} = selected;
         return (
             <>
             <Card className={classes.card}>
               <CardHeader title={name} subheader={location}/>
-                <CardActions>
+                <CardActions className={classes.actions}>
                   <Button size="small" onClick={() => refreshStation(_id) }>Refresh</Button>
                   <Button size="small" onClick={() => generateReport(_id) }>Generate Report</Button>
                   <Button size="small" disabled>Backup</Button>

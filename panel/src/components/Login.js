@@ -63,12 +63,11 @@ class LoginCard extends React.Component {
         JWT.saveToken(user.token);
         this.props.setUser(user);
       }
-      else { 
+      else {
         // TODO: Failed login message
       }
     })
     .catch( (err) => { 
-        // TODO : Fail message
         if (err.status === 422) {
           err.json()
             .then(res => { 
