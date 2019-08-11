@@ -14,7 +14,7 @@
     "serve": "^11.1.0"
   },
   "scripts": {
-    "dev": "react-scripts start",
+    "serve": "react-scripts start",
     "start": "serve -s build",
     "build": "react-scripts build",
     "test": "react-scripts test",

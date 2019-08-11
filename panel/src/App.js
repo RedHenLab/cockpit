@@ -19,6 +19,7 @@ class App extends React.Component {
       user: null,
       stations: [],
       selected: null,
+      archive: [],
       notification: {
         open: false,
         message: '',
@@ -104,6 +105,11 @@ class App extends React.Component {
     .then(res => res.json())
     .then(report=> this.setState({report: report[0]}))
     .catch();
+
+    API.post(report, { _id: selected._id, archive: true })
+    .then(res => res.json())
+    .then(archive=> this.setState({archive}))
+    .catch();
   }
 
   generateReport = (_id) => {
@@ -143,7 +149,7 @@ class App extends React.Component {
     this.setState({notification});
   }
   render() {
-    const {stations, selected, report, notification, screen} = this.state;
+    const {stations, selected, report, notification, screen, archive} = this.state;
 
     return (
       <>
@@ -171,6 +177,7 @@ class App extends React.Component {
                   stations={stations}
                   selected={selected}
                   report={report}
+                  archive={archive}
                   refreshStation={this.refreshStation}
                   updateStation={this.updateStation}
                   generateReport={this.generateReport}

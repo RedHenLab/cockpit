@@ -18,10 +18,10 @@ const styles = {
 
 class Report extends React.Component {
   render() {
-    const { classes, report } = this.props;
+    const { classes, report, archive } = this.props;
     return ( 
       <Card className={classes.card}>
-        <CardHeader title='Latest Report' />
+        <CardHeader title={archive?'Archived Report':'Latest Report'} />
         <CardContent>
         <>
           <Grid container>

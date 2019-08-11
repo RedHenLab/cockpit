@@ -32,6 +32,7 @@ const styles = {
 class InfoPanel extends React.Component {
   state = {
     station: this.props.selected,
+    archive: [],
     disableMetadataEdit: true,
     disableConfigEdit: true,
   }
@@ -43,7 +44,7 @@ class InfoPanel extends React.Component {
   }
 
   render() {
-    const { classes, screen, selected, report, refreshStation, generateReport, addStation, updateStation, deleteStation } = this.props;
+    const { classes, screen, selected, report, archive, refreshStation, generateReport, addStation, updateStation, deleteStation } = this.props;
     if (screen==='add') {
       return (
         <Card>
@@ -55,10 +56,12 @@ class InfoPanel extends React.Component {
           
       )
     }
-    else if(screen==='archive') {
+    else if(screen==='archive' && selected) {
       return (
         <>
-
+          {
+            archive.map(report => <Report key={report._id} report={report} archive={true}/>)
+          }
         </>
       )
     }
