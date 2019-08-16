@@ -7,6 +7,7 @@
   "author": "Aniruddha Mysore",
   "license": "MIT",
   "dependencies": {
+    "agenda": "^2.0.2",
     "body-parser": "^1.19.0",
     "chai": "^4.2.0",
     "compression": "^1.7.4",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.18.2",
     "mocha": "^6.1.4",
     "supertest": "^4.0.2"
   }

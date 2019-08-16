@@ -1,7 +1,7 @@
 const jwt = require('express-jwt');
-const secret = require('../config').secret;
+const { secret } = require('../config');
 
-function getTokenFromHeader(req){
+function getTokenFromHeader(req) {
   if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
     return req.headers.authorization.split(' ')[1];
   }
@@ -10,9 +10,8 @@ function getTokenFromHeader(req){
 }
 
 const auth = jwt({
-    secret: secret,
-    userProperty: 'payload',
-    getToken: getTokenFromHeader
+  secret,
+  getToken: getTokenFromHeader,
 });
 
 module.exports = auth;

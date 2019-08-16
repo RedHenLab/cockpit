@@ -1,6 +1,4 @@
 {
-    "rules": {
-    },
     "env": {
         "node": true,
         "mocha": true
@@ -12,5 +10,14 @@
     "extends": [
        "eslint:recommended",
         "airbnb-base"
-    ]
+    ],
+    "rules": {
+        "no-underscore-dangle": "off",
+        "object-curly-newline": "off",
+        "radix": "off",
+        "camelcase": "warn",
+        "brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
+        "new-cap": ["error", { "newIsCap": false }],
+        "max-len": "warn"
+    }
 }

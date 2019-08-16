@@ -4,12 +4,12 @@ const cors = require('cors');
 const compress = require('compression');
 const bodyParser = require('body-parser');
 
-const app  = express();
+const app = express();
 
 // parse JSON request body and attach to req.body
 app.use(bodyParser.json());
 
-// secure apps by setting various HTTP headers 
+// secure apps by setting various HTTP headers
 app.use(helmet());
 
 // enable gzip compression
@@ -19,4 +19,3 @@ app.use(compress());
 app.use(cors());
 
 module.exports = app;
-
