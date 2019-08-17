@@ -7,26 +7,30 @@ const User = require('./models/user.model');
 const config = require('./config');
 const auth = require('./config/auth');
 
-mongoose.connect(config.mongo, { useNewUrlParser: true });
+mongoose.connect(config.mongo, { useNewUrlParser: true })
+  .catch((err) => {
+    console.log('Could not connect to MongoDB.');
+    console.log(err);
+  });
 
 function handle(middleware) {
-  return async (req, res) => {
+  return async (req, res, next) => {
     try {
-      await middleware(req, res);
+      await middleware(req, res, next);
     }
     catch (err) {
       console.log(err);
-      res.json(err);
+      res.status(403).json(err);
     }
   };
 }
 app.get('/list', auth, handle(Control.listStations));
-app.post('/refresh', auth, handle(Control.refreshStationInfo));
 app.post('/add', auth, Control.addStation);
-app.post('/edit', auth, handle(Control.editStation));
-app.post('/report', auth, handle(Control.runDiagnostics));
-app.post('/delete', auth, handle(Control.deleteStation));
-app.post('/backup', auth, handle(Control.triggerBackup));
+app.post('/edit', auth, handle(Control.getStation), handle(Control.editStation));
+app.post('/delete', auth, handle(Control.getStation), handle(Control.deleteStation));
+app.post('/report', auth, handle(Control.getStation), handle(Control.generateReportRoute));
+app.post('/refresh', auth, handle(Control.getStation), handle(Control.refreshStationRoute));
+app.post('/backup', auth, handle(Control.getStation), handle(Control.triggerBackup));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
@@ -60,6 +64,9 @@ app.get('/user', auth, (req, res, next) => {
     return res.json({ user: user.toAuthJSON() });
   }).catch(next);
 });
+
+// Start Background jobs
+require('./jobs/jobs');
 
 // module.parent check is required to support mocha watch
 // src: https://github.com/mochajs/mocha/issues/1912

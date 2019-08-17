@@ -4,10 +4,10 @@ const server = require('../index');
 const { username, password } = require('../config');
 
 describe('User authentication test', () => {
-  describe('/users/login', () => {
+  describe('/login', () => {
     it('Should login valid user and send JWT response', (done) => {
       request(server)
-        .get(`/users/login?username=${username}&password=${password}`)
+        .get(`/login?username=${username}&password=${password}`)
         .expect(200)
         .then((res) => {
           expect(res.body).to.have.property('username');
