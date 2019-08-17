@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles, Card, CardHeader, CardContent, Typography, Grid, List, ListItem, ListItemIcon, 
          ListItemText, ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary } from '@material-ui/core/';
 import { Storage, SdStorage, CloudOff, Tv, Security, ExpandMore } from '@material-ui/icons';
-import { formatDate, formatSize } from "../services/Formatting";
+import { formatDate, formatSize, roundUp} from "../services/Formatting";
 
 const styles = {
   card: {
@@ -48,7 +48,15 @@ class Report extends React.Component {
                   <ListItemText primary='Disk Drives' />
                 </ListItem>
                 {report.disks.map(r => <ListItem key={r._id}>
-                  <ListItemText primary={r.name} secondary={`${formatSize(r.available)} TB out of ${formatSize(r.available + r.used)} TB available`} />
+                  <ListItemText
+                    primary={r.name}
+                    secondary={
+                      <>
+                        {`${formatSize(r.available)} TB out of ${formatSize(r.available + r.used)} TB available`}
+                        <br />
+                        {`${ roundUp(r.used*100/(r.available+r.used))}% used`} 
+                      </>}
+                  />
                 </ListItem>)}
               </Card>
             </Grid>
@@ -61,7 +69,15 @@ class Report extends React.Component {
                   <ListItemText primary='Memory Card' />
                 </ListItem>
                 {report.cards.map(r => <ListItem key={r._id}>
-                  <ListItemText primary={r.name} secondary={`${formatSize(r.available, 'GB')} MB out of ${formatSize(r.available + r.used, 'GB')} MB available`} />
+                  <ListItemText 
+                    primary={r.name}
+                    secondary={
+                      <>
+                        {`${formatSize(r.available, 'GB')} GB out of ${formatSize(r.available + r.used, 'GB')} GB available`}
+                        <br />
+                        {`${ roundUp(r.used*100/(r.available+r.used))}% used`}
+                      </>}
+                  />
                 </ListItem>)}
               </Card>
             </Grid>
@@ -101,7 +117,15 @@ class Report extends React.Component {
                 <ListItemText primary='Network' />
               </ListItem>
               <ListItem>
-                <ListItemText primary={`Log Period`} secondary={`Starting: ${formatDate(report.network.log_start, false)} | Ending:${formatDate(report.network.log_end, false)}`} />
+                <ListItemText
+                  primary={`Log Period`}
+                  secondary={
+                    <>
+                      {`Starting: ${formatDate(report.network.log_start, false)}`}
+                      <br />
+                      {`Ending: ${formatDate(report.network.log_end, false)}`}
+                    </>}
+                  />
               </ListItem>
               <ExpansionPanel elevation={0}>
                 <ExpansionPanelSummary expandIcon={<ExpandMore />} id="downtimes" elevation={0}>

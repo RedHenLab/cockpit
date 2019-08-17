@@ -4,7 +4,6 @@ class API {
         return new Promise( (resolve, reject) => { 
             fetch(url, request)
             .then( res => {
-                console.log(res.headers);
                 if (res.status !== 200) {
                     // Reject the json data
                     reject(res);

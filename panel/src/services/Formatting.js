@@ -10,8 +10,12 @@ export function formatDate(datestring, asElement = true) {
 }
 
 export function formatSize(sizeInBytes, format = 'TB') {
-  const divisor = (format === 'TB') ? 1000000000 : 1000;
+  const divisor = (format === 'TB') ? 1000000000 : 1000000;
   return Number.parseFloat(sizeInBytes / divisor).toFixed(2);
+}
+
+export function roundUp(number) {
+  return Number.parseFloat(number).toFixed(2);
 }
 
 /**

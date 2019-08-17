@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles, Card, CardHeader, CardActions, CardContent, Button, 
-        Typography, CircularProgress } from '@material-ui/core/';
+        Typography, CircularProgress, Tooltip } from '@material-ui/core/';
 import { Memory } from '@material-ui/icons';
 import Edit from './Edit';
 import Report from './Report';
@@ -44,7 +44,8 @@ class InfoPanel extends React.Component {
   }
 
   render() {
-    const { classes, screen, selected, report, archive, refreshStation, generateReport, addStation, updateStation, deleteStation } = this.props;
+    const { classes, screen, selected, report, archive, refreshStation, generateReport,
+       addStation, updateStation, deleteStation, triggerBackup } = this.props;
     if (screen==='add') {
       return (
         <Card>
@@ -72,15 +73,30 @@ class InfoPanel extends React.Component {
             <Card className={classes.card}>
               <CardHeader title={name} subheader={location}/>
                 <CardActions className={classes.actions}>
-                  <Button size="small" onClick={() => refreshStation(_id) }>Refresh</Button>
-                  <Button size="small" onClick={() => generateReport(_id) }>Generate Report</Button>
-                  <Button size="small" disabled>Backup</Button>
-                  <Button size="small" disabled>Restore from Flash drive</Button>
-                  <Button size="small" color="secondary" onClick={() => deleteStation(_id) }>Delete Station</Button>
+                  <Tooltip title="Refresh uptime metrics">
+                    <Button size="small" onClick={() => refreshStation(_id)}>Refresh</Button>
+                  </Tooltip>
+                  <Tooltip title="Generate a new health report">
+                    <Button size="small" onClick={() => generateReport(_id)}>New Report</Button>
+                  </Tooltip>
+                  <Tooltip title="Create a snapshot of the SD card for backup">
+                    <Button size="small" onClick={() => triggerBackup(_id)}>Backup</Button>
+                  </Tooltip>
+                  <Tooltip title="Delete this station">
+                    <Button size="small" color="secondary" onClick={() => deleteStation(_id)}>Delete Station</Button>
+                  </Tooltip>
                 </CardActions>
               </Card>
               { report ? 
-                <Report report={report}/> : <CircularProgress />
+                <Report report={report}/> : 
+                <Card className={classes.card} style={{alignItems:'center'}}>
+                  <CardHeader title={
+                    <>Loading report
+                    <br />
+                    <CircularProgress />
+                    </>} 
+                  />
+                </Card>
               }
               <Card>
                 <CardHeader title="Station Information"/>

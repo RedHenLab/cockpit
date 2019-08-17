@@ -26,7 +26,7 @@ class Edit extends React.Component {
   render() {
     const { classes, selected, updateStation } = this.props;
     const { disableConfigEdit, disableMetadataEdit, station } = this.state;
-    const { name, location, host, port, ssh_username,  incharge_name, incharge_email } = selected;
+    const { name, location, host, port, SSHUsername,  inchargeName, inchargeEmail, SSHHostPath } = selected;
     return (
       <Grid container>
         <Grid item className={classes.vertical}>
@@ -50,16 +50,16 @@ class Edit extends React.Component {
           <Typography component="p" gutterBottom>Person Incharge</Typography>
           <TextField
             label="Name"
-            value={disableMetadataEdit ? incharge_name: station.incharge_name}
-            onChange={(event) => this.handleChange(event,'incharge_name')}
+            value={disableMetadataEdit ? inchargeName: station.inchargeName}
+            onChange={(event) => this.handleChange(event,'inchargeName')}
             margin="dense"
             variant="outlined"
             disabled={disableMetadataEdit}
           />
           <TextField
             label="Email"
-            value={disableMetadataEdit ? incharge_email: station.incharge_email}
-            onChange={(event) => this.handleChange(event,'incharge_email')}
+            value={disableMetadataEdit ? inchargeEmail: station.inchargeEmail}
+            onChange={(event) => this.handleChange(event,'inchargeEmail')}
             margin="dense"
             variant="outlined"
             disabled={disableMetadataEdit}
@@ -94,12 +94,24 @@ class Edit extends React.Component {
           />
           <TextField
             label="Username"
-            value={disableConfigEdit ? ssh_username: station.ssh_username}
-            onChange={(event) => this.handleChange(event,'ssh_username')}
+            value={disableConfigEdit ? SSHUsername: station.SSHUsername}
+            onChange={(event) => this.handleChange(event,'SSHUsername')}
             margin="dense"
             variant="outlined"
             disabled={disableConfigEdit}
           />
+          <Typography component="p" gutterBottom>SSH Host Path</Typography>
+          {
+            SSHHostPath.map( (host, index) => 
+              <TextField
+                label={`Host ${index+1}`}
+                value={host}
+                margin="dense"
+                variant="outlined"
+                disabled
+              />
+            )
+          }
           { disableConfigEdit ? (
               <Button onClick={( ) => this.setState({disableConfigEdit: false,  station:selected})}> Edit </Button>
             ) : (

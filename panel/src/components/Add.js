@@ -15,9 +15,9 @@ const StationSchema = {
   location: 'Location',
   host: 'Host', 
   port: 'Port',
-  ssh_username: 'SSH Username',
-  incharge_name: 'Incharge Username',
-  incharge_email: 'Incharge Email'
+  SSHUsername: 'SSH Username',
+  inchargeName: 'Incharge Username',
+  inchargeEmail: 'Incharge Email'
 }
 
 class Add extends React.Component {
@@ -27,9 +27,9 @@ class Add extends React.Component {
       location: '',
       host: '',
       port: '',
-      ssh_username: '',
-      incharge_name: '',
-      incharge_email: ''
+      SSHUsername: '',
+      inchargeName: '',
+      inchargeEmail: ''
     }
   }
   

@@ -4,8 +4,9 @@ import StationTable from './components/Table';
 import InfoPanel from './components/DetailedInfo';
 import LoginCard from './components/Login';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Notification from './components/Notification';
-import {list, add, refresh, edit, report, remove} from './config';
+import {list, add, refresh, edit, report, remove, users} from './config';
 import API from './services/API';
 import JWT from './services/JWT';
 import './App.css';
@@ -31,8 +32,15 @@ class App extends React.Component {
     const token = JWT.getToken();
     if (token) {
       API.token = token;
-      this.setState({user: {token} });
-      this.listStations();
+      API.get(users, true)
+      .then(req => req.json())
+      .then(body => {
+        const {user} = body;
+        user.token = token;
+        this.setState({user});
+        this.listStations();
+      })
+      .catch (() => JWT.clearToken())
     }
    }
 
@@ -122,7 +130,9 @@ class App extends React.Component {
     .then(report=> this.setState({report: report[0], selected: null, notification}))
     .catch();
   }
+  triggerBackup () {
 
+  }
   setSelection = (selected) => {
     this.setState({selected});
     this.getReport(selected);
@@ -184,6 +194,7 @@ class App extends React.Component {
                   deleteStation={this.deleteStation}
                   clearSelection={this.clearSelection}
                   addStation={this.addStation}
+                  triggerBackup={this.triggerBackup}
                   />
               </Grid>
               <Grid item md={7} xs={12} style={{padding: 20}}>
@@ -193,7 +204,8 @@ class App extends React.Component {
                   setSelection={this.setSelection}
                   clearSelection={this.clearSelection}
                   />
-              </Grid> 
+                <Footer />
+              </Grid>
             </>
             }
           </Grid>

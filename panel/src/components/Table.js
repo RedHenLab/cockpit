@@ -14,6 +14,7 @@ const styles = theme => ({
   root: {
     width: '100%',
     overflowX: 'auto',
+    marginBottom: 20
   },
   table: {
     minWidth: 700,
@@ -27,8 +28,13 @@ function formatDate(date) {
 
 function Icon(isOnline) {
     return (isOnline) ?
-       <Check style={{color:green[500]}}/>  
-    :  <Error style={{color:red[500]}} />
+      <Tooltip title='Station is online.'>
+        <Check style={{color:green[500]}}/>
+      </Tooltip>
+    :   
+      <Tooltip title='Station has not been reachable.'>
+        <Error style={{color:red[500]}} />
+      </Tooltip>
 }
   
 const toolbarStyles = theme => ({
@@ -78,7 +84,7 @@ const toolbarStyles = theme => ({
         <div className={classes.spacer} />
         <div className={classes.actions}>
           {selected && (
-            <Tooltip title="Delete">
+            <Tooltip title="Close Selection">
               <IconButton onClick={()=>{handleClose()}} aria-label="Delete">
                 <Close/>
               </IconButton>
