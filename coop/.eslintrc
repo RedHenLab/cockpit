@@ -17,7 +17,7 @@
         "radix": "off",
         "camelcase": "warn",
         "brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
-        "new-cap": ["error", { "newIsCap": false }],
-        "max-len": "warn"
+        "max-len": "warn",
+        "prefer-arrow-callback": ["error", { "allowNamedFunctions": true } ]
     }
 }

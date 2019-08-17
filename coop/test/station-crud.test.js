@@ -9,14 +9,15 @@ const station = {
   location: 'Testing grounds',
   host: '127.0.0.1',
   port: '22',
-  username: 'user',
+  SSHUsername: 'user',
+  SSHHostPath: ['fenix'],
 };
 
 let token = '';
 
 describe('CRUD operations test', () => {
   before(async () => {
-    const res = await request(server).get(`/users/login?username=${testUser}&password=${password}`);
+    const res = await request(server).get(`/login?username=${testUser}&password=${password}`);
     ({ token } = res.body);
   });
   describe('/add', () => {
@@ -27,13 +28,13 @@ describe('CRUD operations test', () => {
         .send(station)
         .expect(200)
         .then((res) => {
-          const { _id, name, location, host, port, username } = res.body;
+          const { _id, name, location, host, port, SSHUsername } = res.body;
           station._id = _id;
           expect(name).to.equal(station.name);
           expect(location).to.equal(station.location);
           expect(host).to.equal(station.host);
           expect(port).to.equal(station.port);
-          expect(username).to.equal(station.username);
+          expect(SSHUsername).to.equal(station.SSHUsername);
           done();
         })
         .catch(done);
@@ -44,6 +45,7 @@ describe('CRUD operations test', () => {
     it('Should list all stations', (done) => {
       request(server)
         .get('/list')
+        .set('Authorization', `Bearer ${token}`)
         .expect(200)
         .then((res) => {
           expect(res.body).to.be.an('array');
@@ -53,7 +55,7 @@ describe('CRUD operations test', () => {
             expect(res.body[0]).to.have.property('location');
             expect(res.body[0]).to.have.property('host');
             expect(res.body[0]).to.have.property('port');
-            expect(res.body[0]).to.have.property('username');
+            expect(res.body[0]).to.have.property('SSHUsername');
             expect(res.body[0]).to.have.property('lastBackup');
             expect(res.body[0]).to.have.property('isOnline');
             expect(res.body[0]).to.have.property('onlineSince');
@@ -72,7 +74,7 @@ describe('CRUD operations test', () => {
         location: 'Testing',
         host: '127.0.0.0',
         port: '23',
-        username: 'newuser',
+        SSHUsername: 'newuser',
       };
       request(server)
         .post('/edit')
@@ -80,11 +82,11 @@ describe('CRUD operations test', () => {
         .send(update)
         .expect(200)
         .then((res) => {
-          const { name, location, host, username } = res.body;
+          const { name, location, host, SSHUsername } = res.body;
           expect(name).to.equal(update.name);
           expect(location).to.equal(update.location);
           expect(host).to.equal(update.host);
-          expect(username).to.equal(update.username);
+          expect(SSHUsername).to.equal(update.SSHUsername);
           done();
         })
         .catch(done);
@@ -98,12 +100,12 @@ describe('CRUD operations test', () => {
         .send(update)
         .expect(200)
         .then((res) => {
-          const { _id, name, location, host, username } = res.body;
+          const { _id, name, location, host, SSHUsername } = res.body;
           expect(_id).to.equal(update._id);
           expect(name).to.equal(update.name);
           expect(location).to.equal(update.location);
           expect(host).to.equal(update.host);
-          expect(username).to.equal(update.username);
+          expect(SSHUsername).to.equal(update.SSHUsername);
           done();
         })
         .catch(done);

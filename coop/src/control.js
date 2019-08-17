@@ -15,30 +15,41 @@ class Control {
   }
 
   /**
+   * Middleware to fetch one station from DB
+   * Fails with error if not found
+   */
+  static async getStation(req, res, next) {
+    const station = await Station.findById(req.body._id).exec();
+    if (!station) res.status(400).json({ error: 'Station not found' });
+    req.station = station;
+    return next();
+  }
+
+  /**
    * Check if capture station is online and refresh its status information in the DB.
    */
-  static async refreshStationInfo(req, res) {
-    const station = await Station.findOne({ _id: req.body._id }).exec();
-    if (!station) res.status(400).json({ error: 'Station not found' });
+  static async refreshStationRoute(req, res) {
+    const station = await Control.refreshStation(req.station);
+    const stationObj = station.toObject();
+    stationObj.isOnline = Boolean(station.onlineSince);
+    return res.json(stationObj);
+  }
 
+  static async refreshStation(station) {
     const tele = new Telemetry(station);
     const date = await tele.statusCheck();
+    /* eslint-disable no-param-reassign */
     station.lastChecked = new Date();
     station.onlineSince = date;
     await station.save();
-
-    // TODO : make this part of model
-    const stationObj = station.toObject();
-    stationObj.isOnline = Boolean(date);
-
-    return res.json(stationObj);
+    return station;
   }
 
   /**
    * Run the preloaded diagnostic health check script on the capture station.
    */
-  static async runDiagnostics(req, res) {
-    const station = await Station.findOne({ _id: req.body._id }).exec();
+  static async generateReportRoute(req, res) {
+    const { station } = req;
     if (Object.prototype.hasOwnProperty.call(req.body, 'provideLatest') && req.body.provideLatest === true) {
       const report = await Control.generateReport(station);
       return res.json(report);
@@ -62,8 +73,7 @@ class Control {
     report.hdhomerun_devices = freshReport.hdhomerun_devices;
     report.security = freshReport.security;
     report.errors = freshReport.errors;
-    // TODO: decide created at
-    report.generated_at = freshReport.created_at;
+    report.generated_at = freshReport.generated_at;
     report.fetched_at = new Date();
     report.network.log_start = new Date(Number.parseInt(freshReport.network.log_start) * 1000);
     report.network.log_end = new Date(Number.parseInt(freshReport.network.log_end) * 1000);
@@ -85,8 +95,7 @@ class Control {
    * Start the backup script in background and exit.
    */
   static async triggerBackup(req, res) {
-    const station = await Station.findOne({ _id: req.body._id }).exec();
-    if (!station) return res.status(400).json({ error: 'Station not found' });
+    const { station } = req;
     const tele = new Telemetry(station);
     await tele.backup();
     return res.status(200);
@@ -96,8 +105,8 @@ class Control {
    * Add a new capture station to DB
    */
   static addStation(req, res) {
-    const { name, location, host, port, ssh_username, incharge_email, incharge_name } = req.body;
-    Station.create({ name, location, host, port, ssh_username, incharge_email, incharge_name },
+    const { name, location, host, port, SSHUsername, inchargeEmail, inchargeName } = req.body;
+    Station.create({ name, location, host, port, SSHUsername, inchargeEmail, inchargeName },
       (err, obj) => {
         if (err) return res.status(400).json(err);
         return res.json(obj);
@@ -106,21 +115,20 @@ class Control {
 
   /**
    * Edit an existing capture station
-   * name, location, host, port and ssh_username are editable
+   * name, location, host, port and SSHUsername are editable
   */
   static async editStation(req, res) {
-    const { _id, name, location, host, port, ssh_username,
-      incharge_name, incharge_email } = req.body;
-    const station = await Station.findOne({ _id }).exec();
-    if (!station) res.status(400).json({ error: 'Station not found' });
+    const { station } = req;
+    const { name, location, host, port, SSHUsername,
+      inchargeName, inchargeEmail } = req.body;
 
     station.name = name;
     station.location = location;
     station.host = host;
     station.port = port;
-    station.ssh_username = ssh_username;
-    station.incharge_name = incharge_name;
-    station.incharge_email = incharge_email;
+    station.SSHUsername = SSHUsername;
+    station.inchargeName = inchargeName;
+    station.inchargeEmail = inchargeEmail;
     await station.save();
     return res.json(station);
   }
@@ -129,9 +137,8 @@ class Control {
    * Remove existing capture station from db
    */
   static async deleteStation(req, res) {
-    const station = await Station.findOneAndDelete({ _id: req.body._id }).exec();
-    if (!station) res.status(400).json({ error: 'Station not found' });
-
+    const { station } = req;
+    Station.remove({ _id: station._id });
     return res.json(station);
   }
 
@@ -157,23 +164,25 @@ class Control {
       }
     });
     if (errors.length > 0) {
-      console.log('Mailing');
       const subject = `Alert raised by latest health report from ${station.name}`;
       const text = `The latest health report raised some error flags:\n\n
-      ${errors.join('\n')}\n
-      Report fetched at ${report.fetched_at}\n
-      To see more, check Cockpit`;
+                    ${errors.join('\n')}\n
+                    Report fetched at ${report.fetched_at}\n
+                    To see more, check Cockpit`;
 
+      const { inchargeEmail } = station;
       const admins = await User.find({ role: 'admin' });
       const emails = admins.map(user => user.email);
-      if (!emails.contains(station.incharge_email)) emails.push(station.incharge_email);
+      if (inchargeEmail && !emails.includes(inchargeEmail)) emails.push(inchargeEmail);
       // if there is any error send an email
-      mailer.sendMail({
-        from: '"Red Hen Lab Cockpit" <noreply@cockpit>',
-        bcc: emails.join(','),
-        subject,
-        text,
-      }).catch(err => console.log(err));
+      if (emails.length) {
+        mailer.sendMail({
+          from: '"Red Hen Lab Cockpit" <noreply@cockpit>',
+          bcc: emails.join(','),
+          subject,
+          text,
+        }).catch(err => console.log(err));
+      }
     }
   }
 }
