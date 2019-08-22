@@ -93,10 +93,11 @@ class LoginCard extends React.Component {
                 <Grid item className={classes.vertical}>
                   
                     <TextField
-                    label="Username"
-                    onChange={(event) => this.handleChange(event,'username')}
-                    margin="dense"
-                    variant="outlined"
+                      label="Username"
+                      onChange={(event) => this.handleChange(event,'username')}
+                      margin="dense"
+                      variant="outlined"
+                      autoComplete="username"
                     />
                     <TextField
                         variant="outlined"
@@ -104,6 +105,7 @@ class LoginCard extends React.Component {
                         label="Password"
                         value={password}
                         onChange={(event) => this.handleChange(event,'password')}
+                        autoComplete="current-password"
                         InputProps={{
                         endAdornment: (
                             <InputAdornment position="end">

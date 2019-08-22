@@ -75,10 +75,7 @@ class Telemetry {
       try {
         await ssh.connect(this.credential);
         let connCommand = this.buildConnectionCommand('python3 Cockpit/report.py Cockpit/pings.log Cockpit/report.json');
-        try { await ssh.exec(connCommand); }
-        catch (err) {
-          if (err.message !== 'grep: /var/log/auth.log: Permission denied') throw err;
-        }
+        await ssh.exec(connCommand);
         connCommand = this.buildConnectionCommand('cat Cockpit/report.json');
         const report = await ssh.exec(connCommand);
         return resolve(JSON.parse(report));
@@ -100,8 +97,11 @@ class Telemetry {
     return new Promise(async (resolve, reject) => {
       try {
         await ssh.connect(this.credential);
-        await ssh.exec('cd space; bash callbackup.sh');
-        resolve();
+        let connCommand = this.buildConnectionCommand('date +%Y-%m-%d_%H-%M-%S');
+        const date = await ssh.exec(connCommand);
+        connCommand = this.buildConnectionCommand('nohup bash Cockpit/backup.sh &');
+        await ssh.exec(connCommand);
+        resolve(`/mnt/HD1/backups/backup_${date}.img`);
       }
       catch (err) {
         reject(err);

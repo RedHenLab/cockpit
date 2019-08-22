@@ -32,6 +32,11 @@ const ReportSchema = new mongoose.Schema({
     id: String,
     ip: String,
   }],
+  captured_files: [String],
+  xmltv_entries: [{
+    date: Date,
+    entries: Number,
+  }],
   security: {
     failed_login: Number,
   },

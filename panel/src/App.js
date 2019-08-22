@@ -6,7 +6,8 @@ import LoginCard from './components/Login';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Notification from './components/Notification';
-import {list, add, refresh, edit, report, remove, users} from './config';
+import Prompt from './components/Prompt';
+import {list, add, refresh, edit, report, remove, users, backup} from './config';
 import API from './services/API';
 import JWT from './services/JWT';
 import './App.css';
@@ -22,6 +23,10 @@ class App extends React.Component {
       selected: null,
       archive: [],
       notification: {
+        open: false,
+        message: '',
+      },
+      prompt: {
         open: false,
         message: '',
       }
@@ -128,10 +133,22 @@ class App extends React.Component {
     API.post(report, { _id, provideLatest: true })
     .then(res => res.json())
     .then(report=> this.setState({report: report[0], selected: null, notification}))
-    .catch();
+    .catch(() => {
+      this.raiseNotification('Error generating report.');
+    });
   }
-  triggerBackup () {
-
+  triggerBackup = (_id) => {
+    API.post(backup, { _id})
+    .then(res => res.json())
+    .then(data => {
+      const message = `The SD Card Backup script has been started. It will take 1-2 hours depending on the size of the SD Card.
+Backup Path: ${data.file}
+Please check /home/csa/nohup.out for any error messages`;
+      this.raiseNotification(`Backup started! Path: ${data.file}`)
+    })
+    .catch(() => {
+      this.raiseNotification('Error generating report.');
+    });
   }
   setSelection = (selected) => {
     this.setState({selected});
@@ -152,11 +169,17 @@ class App extends React.Component {
     JWT.clearToken();
   }
   raiseNotification = (message) => this.setState({notification: {open:true, message}});
+  raisePrompt = (message) => this.setState({prompt: {open:true, message}});
 
   handleNotificationClose = () => { 
     const notification = this.state.notification;
     notification.open = false;
     this.setState({notification});
+  }
+  handlePromptClose = () => { 
+    const prompt = this.state.prompt;
+    prompt.open = false;
+    this.setState({prompt});
   }
   render() {
     const {stations, selected, report, notification, screen, archive} = this.state;
@@ -181,7 +204,7 @@ class App extends React.Component {
             }
             {this.state.user && 
             <>
-              <Grid item md={5} xs={12} style={{padding: 20}}>
+              <Grid item md={6} xs={12} style={{padding: 20}}>
                 <InfoPanel
                   screen={screen}
                   stations={stations}
@@ -195,9 +218,10 @@ class App extends React.Component {
                   clearSelection={this.clearSelection}
                   addStation={this.addStation}
                   triggerBackup={this.triggerBackup}
+                  switchScreen={this.switchScreen}
                   />
               </Grid>
-              <Grid item md={7} xs={12} style={{padding: 20}}>
+              <Grid item md={6} xs={12} style={{padding: 20}}>
                 <StationTable 
                   stations={stations}
                   selected={selected}
@@ -210,6 +234,7 @@ class App extends React.Component {
             }
           </Grid>
           <Notification open={notification.open} message={notification.message} handleClose={this.handleNotificationClose}/>
+          <Prompt open={prompt.open} message={prompt.message} handleClose={this.handlePromptClose}/>
         </div>
       </> 
     );

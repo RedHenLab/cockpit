@@ -33,8 +33,6 @@ class InfoPanel extends React.Component {
   state = {
     station: this.props.selected,
     archive: [],
-    disableMetadataEdit: true,
-    disableConfigEdit: true,
   }
 
   handleChange = (event,name) => {
@@ -45,16 +43,10 @@ class InfoPanel extends React.Component {
 
   render() {
     const { classes, screen, selected, report, archive, refreshStation, generateReport,
-       addStation, updateStation, deleteStation, triggerBackup } = this.props;
+       addStation, updateStation, deleteStation, triggerBackup, switchScreen } = this.props;
     if (screen==='add') {
       return (
-        <Card>
-          <CardHeader title="Add a new station"/>
-          <CardContent>
-            <Add addStation={addStation} />
-          </CardContent>
-        </Card>
-          
+        <Add addStation={addStation} switchScreen={switchScreen}/>
       )
     }
     else if(screen==='archive' && selected) {
@@ -67,11 +59,19 @@ class InfoPanel extends React.Component {
       )
     }
     else if (screen==='home' && selected) {
-        const {_id, name, location, lastChecked, lastBackup, onlineSince, isOnline} = selected;
+        const {_id, name, location, lastChecked, lastBackup, onlineSince} = selected;
         return (
             <>
-            <Card className={classes.card}>
-              <CardHeader title={name} subheader={location}/>
+              <Card className={classes.card}>
+                <CardHeader title={name} subheader={location}/>
+                <CardContent>
+                  <Typography variant="caption">Last Check</Typography>
+                  <Typography gutterBottom>{formatDate(lastChecked)}</Typography>
+                  <Typography variant="caption">Uptime</Typography>
+                  <Typography gutterBottom>{formatDate(onlineSince)}</Typography>
+                  <Typography variant="caption">Last Backup</Typography>
+                  <Typography gutterBottom>{formatDate(lastBackup)}</Typography>
+                </CardContent>
                 <CardActions className={classes.actions}>
                   <Tooltip title="Refresh uptime metrics">
                     <Button size="small" onClick={() => refreshStation(_id)}>Refresh</Button>
@@ -98,21 +98,10 @@ class InfoPanel extends React.Component {
                   />
                 </Card>
               }
-              <Card>
-                <CardHeader title="Station Information"/>
-                <CardContent>
-                  <Typography variant="body1"> Connectivity </Typography>
-                  <Typography variant="caption">Last Check</Typography>
-                  <Typography gutterBottom>{formatDate(lastChecked)}</Typography>
-                  <Typography variant="caption">Uptime</Typography>
-                  <Typography gutterBottom>{formatDate(onlineSince)}</Typography>
-                  <Typography variant="caption">Last Backup</Typography>
-                  <Typography gutterBottom>{formatDate(lastBackup)}</Typography>
-                  <Edit selected={selected} updateStation={updateStation}/>
-                </CardContent>
-            </Card></>
+            <Edit selected={selected} updateStation={updateStation}/>
+          </>
         );
-    }
+      }
     else return (
         <Card className={classes.cardEmpty}>
             <CardContent>

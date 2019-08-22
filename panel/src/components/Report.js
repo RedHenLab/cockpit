@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles, Card, CardHeader, CardContent, Typography, Grid, List, ListItem, ListItemIcon, 
          ListItemText, ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary } from '@material-ui/core/';
-import { Storage, SdStorage, CloudOff, Tv, Security, ExpandMore } from '@material-ui/icons';
+import { Storage, SdStorage, CloudOff, Tv, Security, ExpandMore, VideoLibrary } from '@material-ui/icons';
 import { formatDate, formatSize, roundUp} from "../services/Formatting";
 
 const styles = {
@@ -107,41 +107,78 @@ class Report extends React.Component {
                 </ListItem>
               </Card>
             </Grid>
-          </Grid>
-          <Card elevation={0} className={classes.subcard}>
-            <List>
-              <ListItem>
-                <ListItemIcon>
-                  <CloudOff />
-                </ListItemIcon>
-                <ListItemText primary='Network' />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary={`Log Period`}
-                  secondary={
-                    <>
-                      {`Starting: ${formatDate(report.network.log_start, false)}`}
-                      <br />
-                      {`Ending: ${formatDate(report.network.log_end, false)}`}
-                    </>}
-                  />
-              </ListItem>
-              <ExpansionPanel elevation={0}>
-                <ExpansionPanelSummary expandIcon={<ExpandMore />} id="downtimes" elevation={0}>
-                  <Typography> Downtimes </Typography>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails>
-                  <List>
-                    {report.network.downtimes.length === 0 ? <ListItem><ListItemText primary='' secondary='No downtimes in this period' /></ListItem> :
-                      report.network.downtimes.map(r => <ListItem key={r._id}>
-                        <ListItemText primary={``} secondary={`Start:  ${formatDate(r.start, false)} | End: ${formatDate(r.end, false)}`} />
-                      </ListItem>)}
+            <Grid item md={6} xs={12}>
+              <Card elevation={0} className={classes.subcard}>
+                <List disablePadding>
+                  <ListItem>
+                    <ListItemIcon>
+                      <CloudOff />
+                    </ListItemIcon>
+                    <ListItemText primary='Network' />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText
+                      primary={`Log Period`}
+                      secondary={
+                        <>
+                          {`Starting: ${formatDate(report.network.log_start, false)}`}
+                          <br />
+                          {`Ending: ${formatDate(report.network.log_end, false)}`}
+                        </>}
+                      />
+                  </ListItem>
+                  <ExpansionPanel elevation={0}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMore />} id="downtimes" elevation={0}>
+                      <Typography> Downtimes </Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                      <List>
+                        {report.network.downtimes.length === 0 ? <ListItem><ListItemText primary='' secondary='No downtimes in this period' /></ListItem> :
+                          report.network.downtimes.map(r => <ListItem key={r._id}>
+                            <ListItemText primary={``} secondary={`Start:  ${formatDate(r.start, false)} | End: ${formatDate(r.end, false)}`} />
+                          </ListItem>)}
+                      </List>
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
+                </List>
+              </Card>
+            </Grid>
+            <Grid item md={6} xs={12}>
+              <Card elevation={0} className={classes.subcard}>
+                <List disablePadding>
+                  <ListItem>
+                    <ListItemIcon>
+                      <VideoLibrary />
+                    </ListItemIcon>
+                    <ListItemText primary='Capture Report' />
+                  </ListItem>
+                    { report.xmltv_entries &&
+                      <ListItem>
+                        <ListItemText
+                          primary='XMLTV Entries'
+                          secondary={
+                            report.xmltv_entries.map(xmlentry =>
+                              <span key={`${xmlentry.date}${report._id}`} color={"textSecondary"}> {`${formatDate(xmlentry.date,false,false)} : ${xmlentry.entries} entries`}<br/> </span>
+                            )
+                          }
+                        />
+                      </ListItem>
+                    }
                   </List>
-                </ExpansionPanelDetails>
-              </ExpansionPanel>
-            </List>
-          </Card>
+                  <ExpansionPanel elevation={0} style={{padding: 0}}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMore />} id="downtimes" elevation={0}>
+                      <Typography> Captured Files </Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails style={{padding: 0}}>
+                      <List>
+                        {report.captured_files.length === 0 ? <ListItem> <Typography>No files found!</Typography> </ListItem>:
+                        report.captured_files.map(file => <ListItem key={file} children={<Typography>{`${file}`}</Typography>} />)}
+                      </List>
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
+              </Card>
+            </Grid>
+          </Grid>
         </>
       </CardContent>
       </Card>

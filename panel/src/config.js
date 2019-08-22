@@ -7,7 +7,8 @@ const
     remove = `${url}/delete`,
     refresh = `${url}/refresh`,
     report = `${url}/report`,
+    backup = `${url}/backup`,
     login = `${url}/login`,
     users = `${url}/user`;
 
-export {list, add, edit, remove, refresh, report, login, users };
+export {list, add, edit, remove, refresh, report, login, users, backup };

@@ -7,7 +7,9 @@ This repository has 3 parts:
     |    panel/    The dashboard frontend written in React
     |    scripts/  Set of scripts to be run on the Capture Stations
 
-## Setup
+A more detailed explanation of folder oraganisation can be found below
+
+# Setup and Running
 
 Coop and Panel are run together
 
@@ -30,7 +32,7 @@ Run the server
 
 `yarn start`
 
-## Frontend Dashboard
+## Dashboard
 
 Navigate to the `panel` folder
 
@@ -42,9 +44,75 @@ If this is the first time you are running it, download the dependencies with yar
 
 Run the dashboard
 
-`yarn start`
+`yarn serve`
 
-## Blog 
+# Contributing Guide
+
+## Coop
+
+The folder organisation is as follows:
+
+```    
+coop
+├── config
+│   ├── auth.js
+│   ├── express.js
+│   ├── index.js
+│   ├── mailer.js
+│   ├── passport.js
+├── jobs
+│   └── jobs.js
+├── models
+│   ├── report.model.js
+│   ├── stations.model.js
+│   └── user.model.js
+├── src
+│   ├── control.js
+│   └── telemetry.js
+├── test
+│   ├── auth-user.test.js
+│   ├── station-crud.test.js
+│   └── station-ssh.test.js
+├── index.js
+├── package.json
+└── yarn.lock
+```
+
+## Dashboard
+
+```
+panel
+├── public
+│   ├── favicon.png
+│   ├── index.html
+│   └── manifest.json
+├── src
+│   ├── components
+│   │   ├── Add.js
+│   │   ├── DetailedInfo.js
+│   │   ├── Edit.js
+│   │   ├── Footer.js
+│   │   ├── Header.js
+│   │   ├── Login.js
+│   │   ├── Notification.js
+│   │   ├── Report.js
+│   │   └── Table.js
+│   ├── services
+│   │   ├── API.js
+│   │   ├── Formatting.js
+│   │   └── JWT.js
+│   ├── App.css
+│   ├── App.js
+│   ├── config.js
+│   ├── index.css
+│   ├── index.js
+│   ├── logo.png
+│   └── serviceWorker.js
+├── package.json
+└── yarn.lock
+```
+
+# Blog 
 
 This is my project as a Google Summer of Code 2019 student for Red Hen Labs. I maintain a weekly summary of activities here.
 

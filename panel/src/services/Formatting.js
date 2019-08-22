@@ -1,11 +1,11 @@
 import React from 'react';
 import moment from 'moment';
 
-export function formatDate(datestring, asElement = true) {
+export function formatDate(datestring, asElement = true, time = true) {
   if (!datestring) {
     return <br />;
   }
-  const date = moment(datestring).format('MMMM Do YYYY, h:mm a');
+  const date = moment(datestring).format(`MMMM Do YYYY${time?', h:mm a':''}`);
   return asElement ? (<>{date}</>) : date;
 }
 

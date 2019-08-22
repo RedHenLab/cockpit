@@ -67,7 +67,7 @@ class Header extends React.Component {
 
 Header.propTypes = {
   classes: PropTypes.object.isRequired,
-  user: PropTypes.any.isRequired,
+  user: PropTypes.any,
   switchScreen: PropTypes.func.isRequired,
   logout: PropTypes.func.isRequired
 };

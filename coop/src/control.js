@@ -15,6 +15,18 @@ class Control {
   }
 
   /**
+   * Add a new capture station to DB
+   */
+  static addStation(req, res) {
+    const { name, location, host, port, SSHUsername, SSHHostPath, inchargeEmail, inchargeName } = req.body;
+    Station.create({ name, location, host, port, SSHUsername, inchargeEmail, inchargeName, SSHHostPath },
+      (err, obj) => {
+        if (err) return res.status(400).json(err);
+        return res.json(obj);
+      });
+  }
+
+  /**
    * Middleware to fetch one station from DB
    * Fails with error if not found
    */
@@ -23,6 +35,35 @@ class Control {
     if (!station) res.status(400).json({ error: 'Station not found' });
     req.station = station;
     return next();
+  }
+
+  /**
+   * Edit an existing capture station
+  */
+  static async editStation(req, res) {
+    const { station } = req;
+    const { name, location, host, port, SSHUsername,
+      SSHHostPath, inchargeName, inchargeEmail } = req.body;
+
+    station.name = name;
+    station.location = location;
+    station.host = host;
+    station.port = port;
+    station.SSHUsername = SSHUsername;
+    station.inchargeName = inchargeName;
+    station.inchargeEmail = inchargeEmail;
+    station.SSHHostPath = SSHHostPath;
+    await station.save();
+    return res.json(station);
+  }
+
+  /**
+   * Remove existing capture station from db
+   */
+  static async deleteStation(req, res) {
+    const { station } = req;
+    Station.remove({ _id: station._id });
+    return res.json(station);
   }
 
   /**
@@ -36,6 +77,7 @@ class Control {
   }
 
   static async refreshStation(station) {
+    this.checkSSHEnabled(station);
     const tele = new Telemetry(station);
     const date = await tele.statusCheck();
     /* eslint-disable no-param-reassign */
@@ -43,6 +85,15 @@ class Control {
     station.onlineSince = date;
     await station.save();
     return station;
+  }
+
+  /**
+   * Filter to check if SSH credentials exist
+   */
+  static checkSSHEnabled(station) {
+    if (!(station.SSHHostPath && station.SSHHostPath.length)) {
+      throw new Error('SSH Details not found');
+    }
   }
 
   /**
@@ -64,6 +115,7 @@ class Control {
   }
 
   static async generateReport(station) {
+    this.checkSSHEnabled(station);
     const tele = new Telemetry(station);
     const freshReport = await tele.healthCheck();
     const report = new Report();
@@ -75,6 +127,8 @@ class Control {
     report.errors = freshReport.errors;
     report.generated_at = freshReport.generated_at;
     report.fetched_at = new Date();
+    report.captured_files = freshReport.captured_files;
+    report.xmltv_entries = freshReport.xmltv_entries;
     report.network.log_start = new Date(Number.parseInt(freshReport.network.log_start) * 1000);
     report.network.log_end = new Date(Number.parseInt(freshReport.network.log_end) * 1000);
     if (freshReport.network.downtimes) {
@@ -96,50 +150,12 @@ class Control {
    */
   static async triggerBackup(req, res) {
     const { station } = req;
+    this.checkSSHEnabled(station);
     const tele = new Telemetry(station);
-    await tele.backup();
-    return res.status(200);
-  }
-
-  /**
-   * Add a new capture station to DB
-   */
-  static addStation(req, res) {
-    const { name, location, host, port, SSHUsername, inchargeEmail, inchargeName } = req.body;
-    Station.create({ name, location, host, port, SSHUsername, inchargeEmail, inchargeName },
-      (err, obj) => {
-        if (err) return res.status(400).json(err);
-        return res.json(obj);
-      });
-  }
-
-  /**
-   * Edit an existing capture station
-   * name, location, host, port and SSHUsername are editable
-  */
-  static async editStation(req, res) {
-    const { station } = req;
-    const { name, location, host, port, SSHUsername,
-      inchargeName, inchargeEmail } = req.body;
-
-    station.name = name;
-    station.location = location;
-    station.host = host;
-    station.port = port;
-    station.SSHUsername = SSHUsername;
-    station.inchargeName = inchargeName;
-    station.inchargeEmail = inchargeEmail;
+    const file = await tele.backup();
+    station.lastBackup = new Date();
     await station.save();
-    return res.json(station);
-  }
-
-  /**
-   * Remove existing capture station from db
-   */
-  static async deleteStation(req, res) {
-    const { station } = req;
-    Station.remove({ _id: station._id });
-    return res.json(station);
+    return res.status(200).json({ file });
   }
 
   /**

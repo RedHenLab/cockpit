@@ -3,7 +3,7 @@
     Capture Station Report Generation Script
     Author: Aniruddha Mysore
     Repository: https://github.com/animysore/cockpit
-    Version: 3
+    Version: 4
     Requirements:
         - python 3
         - hdhomerun (hdhomerun_config command must be present)
@@ -13,11 +13,13 @@
         - python3 report.py <pings.log file> <output file> 
 """
 import re
+import os
 import sys
 import json
 import pprint
 import subprocess
-from datetime import datetime
+from glob import glob
+from datetime import datetime, date, timedelta
 
 """
 Check if command line arguements are passed
@@ -43,6 +45,8 @@ data = {
         'downtimes': []
     },
     'hdhomerun_devices': [],
+    'xmltv_entries': [],
+    'captured_files': [],
     'errors': [],
     'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 }
@@ -57,6 +61,13 @@ def exec(command):
     return stdout, stderr
 
 """
+    Utility function to print and append error log 
+"""
+def log(message):
+    data['errors'].append(message)
+    print(message)
+
+"""
     Use `df` command to get filesystem usage
     Filter disks and cards connected and save disk usage stats
 
@@ -66,7 +77,7 @@ stdout, stderr = exec(['which', 'smartctl'])
 if stdout:
     smart = True
 else:
-    data['errors'].append("smartmontools not installed")
+    log("smartmontools not installed")
     smart = False
 
 stdout, stderr = exec(['df'])
@@ -111,7 +122,7 @@ for i,row in enumerate(stdout.split('\n')):
                             'lifetime': lifetime
                         }
                 except:
-                    data['errors'].append('Error parsing SMART self test output')
+                    log('Error parsing SMART self test output')
 
         data['storage'][type].append(storagedata)
 
@@ -119,12 +130,11 @@ for i,row in enumerate(stdout.split('\n')):
     Read `/var/log/auth.log` to get failed login attempts
 """
 try:
+    open('/var/log/auth.log')
     stdout, stderr = exec(['grep', '-i',  'failed', '/var/log/auth.log'])
     data['security']['failed_login'] = len(stdout.split('\n'))
-
 except:
-    print('Permssion denied to access /var/log/auth.log')
-    data['errors'].append('Permssion denied to access /var/log/auth.log')
+    log('Permssion denied to access /var/log/auth.log')
 
 """
     Fetch list of hdhomerun devices connected.
@@ -148,8 +158,7 @@ if stdout:
                 'ip': fields[5]
             })
 else:
-    print('hdhomerun_config not found.\nSkipping HDHomeRun health check.')
-    data['errors'].append('hdhomerun_config not found')
+    log('hdhomerun_config not found.')
 
 """
     Compute network downtimes using pings.log file.
@@ -192,12 +201,53 @@ try:
             logfile.truncate(0)
 
 except FileNotFoundError:
-    print('pings.log logfile not found')
-    data['errors'].append('pings.log logfile not found')
+    log('pings.log logfile not found')
 
 except AttributeError:
-    print('pings.log is empty')
-    data['errors'].append('pings.log is empty')
+    log('pings.log is empty')
+
+"""
+    Store capture details.
+    /home/csa/xmltv/ required for xmltv entries
+    /home/csa/tv/ required for list of files captured
+"""
+homedir = '/home/csa/'
+xmldir = '{}xmltv/'.format(homedir)
+tvdir = '{}tv/'.format(homedir)
+
+if not os.path.isdir(homedir):
+    log('{} not found. Cannot find capture directories.'.format(homedir))
+
+else:
+    # Checking capture details of last two days
+    today = date.today().strftime('%Y/%Y-%m/%Y-%m-%d')
+    yest = (date.today() - timedelta(1)).strftime('%Y/%Y-%m/%Y-%m-%d')
+
+    # Number of xmltv entries 
+    if not os.path.isdir(xmldir):
+        log('{} not found. skipping xmltv entries'.format(xmldir))
+    else:
+        # use glob module to use wildcards - to avoid specifying language  
+        todayfile = glob('{}{}-??.xmltv'.format(xmldir,today))
+        yestfile = glob('{}{}-??.xmltv'.format(xmldir,yest))
+
+        if yestfile:
+            data['xmltv_entries'].append({
+                'date': yest[-10:],
+                'entries': len(open(yestfile[0]).read().splitlines()),
+            })
+        if todayfile:
+            data['xmltv_entries'].append({
+                'date': today[-10:], 
+                'entries': len(open(todayfile[0]).read().splitlines()),
+            })
+    
+    # Captured files
+    if not os.path.isdir(tvdir):
+        log('{} not found. skipping captured files'.format(tvdir))
+    else:
+        data['captured_files'].extend(glob('{}{}/*.mpg'.format(tvdir,yest)))
+        data['captured_files'].extend(glob('{}{}/*.mpg'.format(tvdir,today)))
 
 """
     Log the generated data to output file specified

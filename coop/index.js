@@ -6,11 +6,13 @@ const User = require('./models/user.model');
 
 const config = require('./config');
 const auth = require('./config/auth');
+const schedule = require('./jobs/jobs');
 
 mongoose.connect(config.mongo, { useNewUrlParser: true })
   .catch((err) => {
     console.log('Could not connect to MongoDB.');
     console.log(err);
+    process.exit(1);
   });
 
 function handle(middleware) {
@@ -66,7 +68,9 @@ app.get('/user', auth, (req, res, next) => {
 });
 
 // Start Background jobs
-require('./jobs/jobs');
+schedule()
+  .then(() => console.log('Started background jobs'))
+  .catch(() => console.log('Could not start background jobs'));
 
 // module.parent check is required to support mocha watch
 // src: https://github.com/mochajs/mocha/issues/1912
