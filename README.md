@@ -7,7 +7,7 @@ This repository has 3 parts:
     |    panel/    The dashboard frontend written in React
     |    scripts/  Set of scripts to be run on the Capture Stations
 
-A more detailed explanation of folder oraganisation can be found below
+A more detailed explanation of folder organisation can be found below
 
 # Setup and Running
 
@@ -18,11 +18,17 @@ The scripts are to be loaded on the capture stations
 
 ## Coop
 
-**Note:  Coop requires mongodb to be running** 
+**Note:  Coop requires a mongodb server and a mail server to function correctly. The mongodb server can be run locally. It is recommended to use a 3rd party mail server if you do not have one setup already, like gmail or sendgrid.** 
 
 To run coop, first navigate to the `coop` folder
 
 `cd coop`
+
+Create a `.env` file using the example provided. 
+
+`cp .env.example .env`
+
+Edit this file and add the appropriate configurations for MongoDB and the SMTP server.
 
 If this is the first time you are running it, download the dependencies with yarn
 
