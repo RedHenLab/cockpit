@@ -67,14 +67,14 @@ app.get('/user', auth, (req, res, next) => {
   }).catch(next);
 });
 
-// Start Background jobs
-schedule()
-  .then(() => console.log('Started background jobs'))
-  .catch(() => console.log('Could not start background jobs'));
-
 // module.parent check is required to support mocha watch
 // src: https://github.com/mochajs/mocha/issues/1912
 if (!module.parent) {
+  // Start Background jobs
+  schedule()
+    .then(() => console.log('Started background jobs'))
+    .catch(() => console.log('Could not start background jobs'));
+
   app.listen(config.port, () => {
     console.log(`Started coop on port ${config.port}`);
   });

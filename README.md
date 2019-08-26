@@ -46,6 +46,10 @@ Run the dashboard
 
 `yarn serve`
 
+To run tests
+
+`yarn test`
+
 # Contributing Guide
 
 ## Coop
@@ -114,10 +118,12 @@ panel
 
 # Blog 
 
-This is my project as a Google Summer of Code 2019 student for Red Hen Labs. I maintain a weekly summary of activities here.
+This was my project as a Google Summer of Code 2019 student for Red Hen Labs. I maintained a weekly summary of activities here.
 
 1. [**Google Summer of Code '19 - The application process**](https://medium.com/@animysore/gsoc-19-the-application-process-and-being-accepted-30ce8d134951)
 2. [**Week 1**](https://medium.com/@animysore/google-summer-of-code-2019-week-1-9dbaf8572c24)
 3. [**Week 2**](https://medium.com/@animysore/google-summer-of-code-2019-week-2-d5af857a5b80)
 4. [**Week 3 and 4**](https://medium.com/@animysore/gsoc19-week-3-and-4-95ba4ba5142f)
-5. [**First Evaluation and Week 5**](https://medium.com/@animysore/first-evaluation-for-google-summer-of-code-19-f58b33264d9f)
+5. [**First Evaluation Week**](https://medium.com/@animysore/first-evaluation-for-google-summer-of-code-19-f58b33264d9f)
+6. [**Week 6**](https://medium.com/@animysore/google-summer-of-code-2019-week-6-b3d8451e43d4)
+7. [**Final Report**](https://medium.com/@animysore/google-summer-of-code-2019-week-6-b3d8451e43d4)

@@ -179,6 +179,10 @@ class Control {
         errors.push(`[!] A disk is almost full - ${disk.name} is ${percentUsed * 100}% used`);
       }
     });
+    // No captured files present
+    if (!report.captured_files || report.captured_files.length === 0) {
+      errors.push('[!] No recorded files were found');
+    }
     if (errors.length > 0) {
       const subject = `Alert raised by latest health report from ${station.name}`;
       const text = `The latest health report raised some error flags:\n\n
